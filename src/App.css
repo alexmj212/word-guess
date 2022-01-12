@@ -1,38 +1,37 @@
-.App {
-  text-align: center;
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  @apply bg-gray-100;
+  @apply dark:text-white dark:bg-gray-900;
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
+.button {
+  @apply flex justify-center items-center;
+  @apply text-2xl border-2 rounded-xl m-1 p-2 font-bold border-slate-400;
+  @apply disabled:opacity-30;
+  @apply transition;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
+.letter-option {
+  @apply bg-blue-400;
+  @apply dark:bg-slate-700;
+  @apply w-16 h-16;
 }
 
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
+.guess-box {
+  @apply w-16 h-16;
 }
 
-.App-link {
-  color: #61dafb;
+.no-match {
+  @apply bg-slate-400 dark:bg-slate-700;
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+.contain-match {
+  @apply bg-yellow-400 dark:bg-yellow-700;
+}
+
+.position-match {
+  @apply bg-green-400 dark:bg-green-700;
 }
