@@ -21,7 +21,6 @@ function App() {
   const [disableSubmit, setDisableSubmit] = useState<boolean>(true);
   const [disableBackspace, setDisableBackspace] = useState<boolean>(true);
   const [goalWord, setGoalWord] = useState<string>("");
-  const [guessedWord, setGuessedWord] = useState<string>("");
   const [error, setError] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string>("");
   const [showSuccess, setShowSuccess] = useState<boolean>(false);
@@ -101,7 +100,6 @@ function App() {
     if (guessWords.includes(guessedWord.toLocaleLowerCase()) || validWords.includes(guessedWord.toLocaleLowerCase())) {
       validateWord(guessedWord);
     } else {
-      setGuessedWord(guessedWord);
       setError(true);
       setErrorMessage(`${guessedWord} is not a word!`);
     }
@@ -163,7 +161,6 @@ function App() {
   };
 
   const clearError = () => {
-    setGuessedWord("");
     setErrorMessage("")
     setError(false);
   };
