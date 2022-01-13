@@ -181,7 +181,7 @@ function App() {
     const rows = guessArray.filter((row) => !row.every((letter) => letter.letter === ""));
     let shareText = `Word Guess `;
     shareText += `${validWords.indexOf(goalWord.toLocaleLowerCase())} `;
-    shareText += `${rows.length}/6`;
+    shareText += `${showFail ? 'X' : rows.length}/6`;
     shareText += "\n\n";
 
     rows.forEach((row, index) => {
@@ -245,7 +245,7 @@ function App() {
               {showFail && <div className="button bg-red-400 dark:bg-red-700">Sorry! The word was {goalWord}</div>}
               {showSuccess && <div className="button bg-green-400 dark:bg-green-700">Success! The word is {goalWord}!</div>}
               <ul className="list-none flex flex-row space-x-4">
-                {showSuccess && (
+                {(showFail || showSuccess) && (
                   <li>
                     <div className="underline cursor-pointer" onClick={() => setOpenShareModal(true)}>
                       Share Results
@@ -318,7 +318,7 @@ function App() {
           </div>
         </div>
       </Modal>
-      {showSuccess && (
+      {(showSuccess || showFail) && (
         <Modal open={openShareModal} setOpen={setOpenShareModal} title={`Success! The word is ${goalWord}`}>
           <div className="flex flex-col justify-center">
             <pre className="bg-slate-200 dark:bg-slate-800 px-4 py-2 rounded-md">{generateShareText()}</pre>
