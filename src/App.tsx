@@ -1,11 +1,14 @@
 import React, { useEffect, useState } from "react";
 import "./App.css";
+import Modal from "./Modal";
 import { guessWords, validWords } from "./wordList";
+import { BackspaceIcon, BookOpenIcon } from "@heroicons/react/outline";
 
 type LetterState = {
   letter: string;
   containMatch: boolean;
   positionMatch: boolean;
+  noMatch: boolean;
   disabled: boolean;
 };
 
@@ -22,10 +25,12 @@ function App() {
   const [showError, setShowError] = useState<boolean>(false);
   const [showSuccess, setShowSuccess] = useState<boolean>(false);
   const [showFail, setShowFail] = useState<boolean>(false);
+  const [openRulesModal, setOpenRulesModal] = useState<boolean>(false);
   const blankLetter: LetterState = {
     letter: "",
     containMatch: false,
     positionMatch: false,
+    noMatch: false,
     disabled: false,
   };
 
@@ -112,7 +117,7 @@ function App() {
       } else {
         const letterOption = letterOptions.find((letterOption: LetterState) => letterOption.letter === letter);
         if (letterOption) {
-          letterOption.disabled = true;
+          letterOption.noMatch = true;
         }
       }
     });
@@ -137,7 +142,9 @@ function App() {
   };
 
   const determineLetterClass = (letterState: LetterState) => {
-    if (letterState.containMatch && !letterState.positionMatch) {
+    if (letterState.noMatch && !letterState.positionMatch && !letterState.containMatch) {
+      return "no-match";
+    } else if (letterState.containMatch && !letterState.positionMatch) {
       return "contain-match";
     } else if (letterState.containMatch && letterState.positionMatch) {
       return "position-match";
@@ -148,63 +155,28 @@ function App() {
 
   return (
     <div className="w-full h-full">
-      <div className="w-full max-w-4xl mx-auto my-8 px-4">
-        <h1 className="text-4xl border-b-2 pb-4">Word Guess Puzzle #{validWords.indexOf(goalWord.toLocaleLowerCase())}</h1>
-        <div className="my-4 mx-auto max-w-2xl flex flex-col justify-center">
-          <div className="flex flex-col">
-            <div className="flex flex-row flex-wrap mb-4 justify-center">
-              {letterOptions.map((letter) => {
-                return (
-                  <button key={letter.letter} onClick={() => onSelect(letter.letter)} value={letter.letter} className={`button letter-option ${determineLetterClass(letter)}`} disabled={letter.disabled || showSuccess || showFail}>
-                    {letter.letter}
-                  </button>
-                );
-              })}
-              <button className="button bg-red-400 dark:bg-red-700" onClick={onBackspace} disabled={showSuccess || showFail || disableBackspace}>
-                Backspace
+      <div className="w-full max-w-4xl mx-auto my-2 px-2 sm:my-4 sm:px-4">
+        <div className="flex flex-row justify-between items-end border-b-2 pb-4">
+          <h1 className="text-lg md:text-4xl font-bold">Word Guess #{validWords.indexOf(goalWord.toLocaleLowerCase())}</h1>
+          <ul>
+            <li>
+              <button title="Rules" onClick={() => setOpenRulesModal(true)}>
+                <BookOpenIcon className="w-8 h-8 inline-block" />
               </button>
-              <button className="button bg-green-400 dark:bg-green-700" onClick={onSubmit} disabled={disableSubmit}>
-                Guess Word
-              </button>
-            </div>
-            <div className="flex flex-col justify-center items-center">
-              {showError && <div className="button bg-yellow-400 dark:bg-yellow-700">{guessedWord} is not a word!</div>}
-              {showFail && <div className="button bg-red-400 dark:bg-red-700">Sorry! The word was {goalWord}</div>}
-              {showSuccess && <div className="button bg-green-400 dark:bg-green-700">Congrats! The word is {goalWord}!</div>}
-              {(showFail || showSuccess) && (
-                <div className="underline cursor-pointer" onClick={() => window.location.reload()}>
-                  Try another?
-                </div>
-              )}
-            </div>
-          </div>
+            </li>
+          </ul>
         </div>
-        <div className="flex flex-wrap justify-center">
-          <div className="flex flex-col flex-wrap flex-1 p-4 basis-1/2">
-            <div className="flex flex-col mb-4">
-              <h2 className="text-2xl mb-4">Reveal the hidden word!</h2>
-              <ul className="list-disc list-inside pl-4">
-                <li>The hidden word is 5 letters.</li>
-                <li>Select letters above and then select "Guess Word" to see if you are correct.</li>
-                <li>Use the backspace to remove letters.</li>
-                <li>You will gets hints if your letters are in the hidden word.</li>
-                <li>Incorrect letters will be removed from the board.</li>
-                <li>You have 6 tries to guess the word.</li>
-                <li>Refresh the page to get a new puzzle.</li>
-              </ul>
-            </div>
-            <div className="pl-2">
-              <h2 className="text-2xl mb-4">Hint Key</h2>
-              <div className="flex flex-row items-center">
-                <div className="button no-match"> </div> = no match
-              </div>
-              <div className="flex flex-row items-center">
-                <div className="button contain-match"> </div> = letter match
-              </div>
-              <div className="flex flex-row items-center">
-                <div className="button position-match"> </div> = position match
-              </div>
-            </div>
+        <div className="my-4 mx-auto md:max-w-xl flex flex-col justify-center">
+          <div className="flex flex-row flex-wrap mb-4 justify-center space-x-4">
+            <button className="underline" onClick={() => window.location.reload()}>
+              New Puzzle
+            </button>
+            <button className="underline" onClick={() => setShowFail(true)}>
+              Reveal Word
+            </button>
+            <button className="underline" onClick={() => setOpenRulesModal(true)}>
+              Rules
+            </button>
           </div>
           <div>
             {guessArray.map((guessRow, row) => (
@@ -220,6 +192,35 @@ function App() {
               </div>
             ))}
           </div>
+          <div className="flex flex-col">
+            <div className="flex flex-col justify-center items-center h-20">
+              {showError && <div className="button bg-yellow-400 dark:bg-yellow-700">{guessedWord} is not a word!</div>}
+              {showFail && <div className="button bg-red-400 dark:bg-red-700">Sorry! The word was {goalWord}</div>}
+              {showSuccess && <div className="button bg-green-400 dark:bg-green-700">Congrats! The word is {goalWord}!</div>}
+              {(showFail || showSuccess) && (
+                <div className="underline cursor-pointer" onClick={() => window.location.reload()}>
+                  Try another?
+                </div>
+              )}
+            </div>
+            <div className="flex flex-row flex-wrap justify-center">
+              {letterOptions.map((letter) => {
+                return (
+                  <button key={letter.letter} onClick={() => onSelect(letter.letter)} value={letter.letter} className={`button letter-option ${determineLetterClass(letter)}`} disabled={letter.disabled || showSuccess || showFail}>
+                    {letter.letter}
+                  </button>
+                );
+              })}
+            </div>
+            <div className="flex flex-row flex-wrap justify-center">
+              <button className="button bg-red-400 dark:bg-red-700" onClick={onBackspace} disabled={showSuccess || showFail || disableBackspace}>
+                <BackspaceIcon className="h-10 w-10" />
+              </button>
+              <button className="button bg-green-400 dark:bg-green-700" onClick={onSubmit} disabled={disableSubmit}>
+                Guess Word
+              </button>
+            </div>
+          </div>
         </div>
         <div className="border-t-2 mt-4 py-4 flex flex-row justify-between">
           <div>
@@ -234,6 +235,33 @@ function App() {
           </div>
         </div>
       </div>
+      <Modal open={openRulesModal} setOpen={setOpenRulesModal} title="Guess the Hidden Word!">
+        <div className="flex flex-col">
+          <ul className="list-disc list-inside">
+            <li>The hidden word is 5 letters.</li>
+            <li>Select letters to spell a word.</li>
+            <li>Use "Guess Word" to see if you are correct.</li>
+            <li>
+              Use <BackspaceIcon className="h-6 w-6 inline-block" /> to remove letters from your guess.
+            </li>
+            <li>You will gets hints if your letters are in the hidden word.</li>
+            <li>You have 6 tries to guess the word.</li>
+            <li>Refresh the page to get a new puzzle.</li>
+          </ul>
+        </div>
+        <div>
+          <h2 className="text-lg font-bold leading-10">Hint Key</h2>
+          <div className="flex flex-row items-center">
+            <div className="button w-10 h-10 no-match"> </div> = No letters match
+          </div>
+          <div className="flex flex-row items-center">
+            <div className="button w-10 h-10 contain-match"> </div> = A letter is correct but in the wrong position
+          </div>
+          <div className="flex flex-row items-center">
+            <div className="button w-10 h-10 position-match"> </div> = A letter is correct and in the right position
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 }
