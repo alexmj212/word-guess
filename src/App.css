@@ -9,10 +9,13 @@ body {
 
 .button {
   @apply flex justify-center items-center;
-  @apply text-xl rounded-md m-[2px] px-4 font-bold ;
+  @apply text-xl rounded-md m-[2px] px-4 font-bold;
+  @apply border-2 border-transparent;
   @apply hover:shadow-md;
   @apply hover:border-slate-500 dark:hover:border-slate-100;
   @apply disabled:opacity-30 hover:disabled:border-slate-400;
+  @apply active:shadow active:border-2 active:border-slate-300;
+  @apply dark:active:border-slate-500;
   @apply transition;
   @apply select-none;
 }

@@ -22,10 +22,12 @@ function App() {
   const [disableBackspace, setDisableBackspace] = useState<boolean>(true);
   const [goalWord, setGoalWord] = useState<string>("");
   const [guessedWord, setGuessedWord] = useState<string>("");
-  const [showError, setShowError] = useState<boolean>(false);
+  const [error, setError] = useState<boolean>(false);
+  const [errorMessage, setErrorMessage] = useState<string>("");
   const [showSuccess, setShowSuccess] = useState<boolean>(false);
   const [showFail, setShowFail] = useState<boolean>(false);
   const [openRulesModal, setOpenRulesModal] = useState<boolean>(false);
+  const [openShareModal, setOpenShareModal] = useState<boolean>(false);
   const blankLetter: LetterState = {
     letter: "",
     containMatch: false,
@@ -48,6 +50,12 @@ function App() {
       setDisableBackspace(guessArray[mapPointer[0]].every((letter) => letter.letter === ""));
     }
   }, [guessArray, mapPointer, showSuccess, showFail]);
+
+  useEffect(() => {
+    if (showSuccess) {
+      setOpenShareModal(true);
+    }
+  }, [showSuccess]);
 
   const generateEmptyGuessArray = () => {
     setGuessArray(
@@ -94,40 +102,54 @@ function App() {
       validateWord(guessedWord);
     } else {
       setGuessedWord(guessedWord);
-      setShowError(true);
+      setError(true);
+      setErrorMessage(`${guessedWord} is not a word!`);
     }
   };
 
   const validateWord = (guess: string) => {
+    if (alreadyGuessed(guess)) {
+      setError(true);
+      setErrorMessage(`You already tried ${guess}.`);
+      return;
+    }
+
     guess.split("").forEach((letter, index) => {
+      const letterSearch = (letterOption: LetterState) => letterOption.letter === letter;
       if (goalWord.indexOf(letter) >= 0) {
         guessArray[mapPointer[0]][index].containMatch = true;
-        const letterOption = letterOptions.find((letterOption: LetterState) => letterOption.letter === letter);
+        const letterOption = letterOptions.find(letterSearch);
         if (letterOption) {
           letterOption.containMatch = true;
         }
 
         if (goalWord.split("")[index] === letter) {
           guessArray[mapPointer[0]][index].positionMatch = true;
-          const letterOption = letterOptions.find((letterOption: LetterState) => letterOption.letter === letter);
+          const letterOption = letterOptions.find(letterSearch);
           if (letterOption) {
             letterOption.positionMatch = true;
           }
         }
       } else {
-        const letterOption = letterOptions.find((letterOption: LetterState) => letterOption.letter === letter);
+        const letterOption = letterOptions.find(letterSearch);
         if (letterOption) {
+          guessArray[mapPointer[0]][index].noMatch = true;
           letterOption.noMatch = true;
+          // Add difficulty
+          // letterOption.disabled = true;
         }
       }
     });
+    // Success
     if (guess === goalWord) {
       setShowSuccess(true);
       return;
     }
+    // No success, next line
     if (mapPointer[0] < guessArray.length) {
       setMapPointer([mapPointer[0] + 1, 0]);
     }
+    // Out of guess
     if (mapPointer[0] === guessArray.length - 1) {
       setShowFail(true);
       return;
@@ -136,9 +158,14 @@ function App() {
     setGuessArray([...guessArray]);
   };
 
+  const alreadyGuessed = (guess: string): boolean => {
+    return guessArray.slice(0, mapPointer[0]).some((row) => row.map(letter => letter.letter).join("") === guess);
+  };
+
   const clearError = () => {
     setGuessedWord("");
-    setShowError(false);
+    setErrorMessage("")
+    setError(false);
   };
 
   const determineLetterClass = (letterState: LetterState) => {
@@ -151,6 +178,29 @@ function App() {
     } else {
       return "";
     }
+  };
+
+  const generateShareText = (): string => {
+    const rows = guessArray.filter((row) => !row.every((letter) => letter.letter === ""));
+    let shareText = `Word Guess `;
+    shareText += `${validWords.indexOf(goalWord.toLocaleLowerCase())} `;
+    shareText += `${rows.length}/6`;
+    shareText += "\n\n";
+
+    rows.forEach((row, index) => {
+      row.forEach((letter, letterIndex) => {
+        if (letter.noMatch && !letter.containMatch && !letter.positionMatch) {
+          shareText += "⬛";
+        } else if (letter.containMatch && !letter.positionMatch) {
+          shareText += "🟨";
+        } else if (letter.containMatch && letter.positionMatch) {
+          shareText += "🟩";
+        }
+      });
+      shareText += "\n";
+    });
+
+    return shareText;
   };
 
   return (
@@ -194,23 +244,32 @@ function App() {
           </div>
           <div className="flex flex-col">
             <div className="flex flex-col justify-center items-center h-20">
-              {showError && <div className="button bg-yellow-400 dark:bg-yellow-700">{guessedWord} is not a word!</div>}
+              {error && <div className="button bg-yellow-400 dark:bg-yellow-700">{errorMessage}</div>}
               {showFail && <div className="button bg-red-400 dark:bg-red-700">Sorry! The word was {goalWord}</div>}
-              {showSuccess && <div className="button bg-green-400 dark:bg-green-700">Congrats! The word is {goalWord}!</div>}
-              {(showFail || showSuccess) && (
-                <div className="underline cursor-pointer" onClick={() => window.location.reload()}>
-                  Try another?
-                </div>
-              )}
+              {showSuccess && <div className="button bg-green-400 dark:bg-green-700">Success! The word is {goalWord}!</div>}
+              <ul className="list-none flex flex-row space-x-4">
+                {showSuccess && (
+                  <li>
+                    <div className="underline cursor-pointer" onClick={() => setOpenShareModal(true)}>
+                      Share Results
+                    </div>
+                  </li>
+                )}
+                {(showFail || showSuccess) && (
+                  <li>
+                    <div className="underline cursor-pointer" onClick={() => window.location.reload()}>
+                      Try another?
+                    </div>
+                  </li>
+                )}
+              </ul>
             </div>
             <div className="flex flex-row flex-wrap justify-center">
-              {letterOptions.map((letter) => {
-                return (
-                  <button key={letter.letter} onClick={() => onSelect(letter.letter)} value={letter.letter} className={`button letter-option ${determineLetterClass(letter)}`} disabled={letter.disabled || showSuccess || showFail}>
-                    {letter.letter}
-                  </button>
-                );
-              })}
+              {letterOptions.map((letter) => (
+                <button key={letter.letter} onClick={() => onSelect(letter.letter)} value={letter.letter} className={`button letter-option ${determineLetterClass(letter)}`} disabled={letter.disabled || showSuccess || showFail}>
+                  {letter.letter}
+                </button>
+              ))}
             </div>
             <div className="flex flex-row flex-wrap justify-center">
               <button className="button bg-red-400 dark:bg-red-700" onClick={onBackspace} disabled={showSuccess || showFail || disableBackspace}>
@@ -262,6 +321,13 @@ function App() {
           </div>
         </div>
       </Modal>
+      {showSuccess && (
+        <Modal open={openShareModal} setOpen={setOpenShareModal} title={`Success! The word is ${goalWord}`}>
+          <div className="flex flex-col justify-center">
+            <pre className="bg-slate-200 dark:bg-slate-800 px-4 py-2 rounded-md">{generateShareText()}</pre>
+          </div>
+        </Modal>
+      )}
     </div>
   );
 }
