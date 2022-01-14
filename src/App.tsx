@@ -2,11 +2,13 @@ import React, { useEffect, useState } from "react";
 import "./App.css";
 import Modal from "./Modal";
 import { alphabet, guessWords, validWords } from "./wordList";
-import { BackspaceIcon, BookOpenIcon } from "@heroicons/react/outline";
+import { BackspaceIcon, BookOpenIcon, ChartBarIcon } from "@heroicons/react/outline";
 import Toast, { ToastTypes } from "./Toast";
 import utilities from "./util";
 import GuessDisplay from "./GuessDisplay";
 import Keyboard from "./Keyboard";
+import { GameLogManager } from "./GameLogManager";
+import StatBlock from "./StatBlock";
 
 export type LetterState = {
   letter: string;
@@ -37,6 +39,10 @@ function App() {
   // Modals
   const [openRulesModal, setOpenRulesModal] = useState<boolean>(false);
   const [openShareModal, setOpenShareModal] = useState<boolean>(false);
+  const [openStatsModal, setOpenStatsModal] = useState<boolean>(false);
+
+  // Initialize Game Log Manager
+  const gameLogManager = new GameLogManager();
 
   // Default Letter
   const blankLetter: LetterState = {
@@ -51,6 +57,9 @@ function App() {
     // Generate guess map and keyboard
     generateEmptyGuessMap();
     generateAlphabet();
+
+    // Show the rules on the first time
+    setOpenRulesModal(gameLogManager.gameLog.gamesPlayed === 0 && gameLogManager.gameLog.guessCount === 0);
 
     // Select a goal word at random
     const randomWord = validWords[Math.floor(Math.random() * validWords.length)];
@@ -136,6 +145,7 @@ function App() {
     if (guessWords.includes(guessedWord.toLocaleLowerCase()) || validWords.includes(guessedWord.toLocaleLowerCase())) {
       validateWord(guessedWord);
     } else {
+      gameLogManager.updateInvalidWordCount();
       setError(true);
       setErrorMessage(`${guessedWord} is not a word!`);
     }
@@ -154,6 +164,8 @@ function App() {
       setErrorMessage(`You already tried ${guess}.`);
       return;
     }
+
+    gameLogManager.updateGuessCount();
 
     // Loop over array of letter from the guessed word
     guess.split("").forEach((letter, index) => {
@@ -199,6 +211,7 @@ function App() {
 
     // Success
     if (guess === goalWord) {
+      gameLogManager.updateWinCount(guess, mapPointer[0] + 1);
       setShowSuccess(true);
       return;
     }
@@ -210,6 +223,7 @@ function App() {
 
     // Out of guesses
     if (mapPointer[0] === guessMap.length - 1) {
+      gameLogManager.updateLossCount();
       setShowFail(true);
       return;
     }
@@ -231,7 +245,12 @@ function App() {
       <div className="w-full max-w-4xl mx-auto my-2 px-2 sm:my-4 sm:px-4">
         <div className="flex flex-row justify-between items-end border-b-2 pb-4">
           <h1 className="text-lg md:text-4xl font-bold">Word Guess #{puzzleNumber}</h1>
-          <ul>
+          <ul className="list-none flex flex-row space-x-4">
+            <li>
+              <button title="Stats" onClick={() => setOpenStatsModal(true)}>
+                <ChartBarIcon className="w-8 h-8 inline-block" />
+              </button>
+            </li>
             <li>
               <button title="Rules" onClick={() => setOpenRulesModal(true)}>
                 <BookOpenIcon className="w-8 h-8 inline-block" />
@@ -242,19 +261,19 @@ function App() {
         <div className="my-4 mx-auto md:max-w-xl flex flex-col justify-center">
           <div className="flex flex-row flex-wrap mb-4 justify-center space-x-4">
             <button className="underline" onClick={() => window.location.reload()}>
-              New Puzzle
+              Get a New Puzzle
             </button>
             <button
               className="underline"
               onClick={() => {
-                clearError();
-                setShowFail(true);
+                if (!showFail) {
+                  gameLogManager.updateForfeitCount();
+                  clearError();
+                  setShowFail(true);
+                }
               }}
             >
-              Reveal Word
-            </button>
-            <button className="underline" onClick={() => setOpenRulesModal(true)}>
-              Rules
+              Forfeit Puzzle
             </button>
           </div>
           <GuessDisplay guessMap={guessMap} mapPointer={mapPointer} />
@@ -268,6 +287,11 @@ function App() {
                   <li>
                     <div className="underline cursor-pointer" onClick={() => setOpenShareModal(true)}>
                       Share Results
+                    </div>
+                  </li>
+                  <li>
+                    <div className="underline cursor-pointer" onClick={() => setOpenStatsModal(true)}>
+                      View Your Stats
                     </div>
                   </li>
                   <li>
@@ -318,22 +342,40 @@ function App() {
         </div>
         <div>
           <h2 className="text-lg font-bold leading-10">Hint Key</h2>
-          <div className="flex flex-row items-center">
-            <div className="button w-10 h-10 no-match"> </div> = No letters match
+          <div className="flex flex-row items-center space-x-2">
+            <div className="button w-10 h-10 no-match"> </div>
+            <span>No letters match</span>
           </div>
-          <div className="flex flex-row items-center">
-            <div className="button w-10 h-10 contain-match"> </div> = A letter is correct but in the wrong position
+          <div className="flex flex-row items-center space-x-2">
+            <div className="button w-10 h-10 contain-match"> </div>
+            <span>A letter is correct but in the wrong position</span>
           </div>
-          <div className="flex flex-row items-center">
-            <div className="button w-10 h-10 position-match"> </div> = A letter is correct and in the right position
+          <div className="flex flex-row items-center space-x-2">
+            <div className="button w-10 h-10 position-match"> </div>
+            <span>A letter is correct and in the right position</span>
           </div>
+        </div>
+      </Modal>
+      <Modal open={openStatsModal} setOpen={setOpenStatsModal} title="Word Guess Statistics">
+        <StatBlock gameLog={gameLogManager.gameLog} />
+        <div className="w-full text-center mt-4">
+          <button
+            className="underline pointer-cursor"
+            onClick={() => {
+              gameLogManager.resetGameLog();
+              window.location.reload();
+            }}
+          >
+            Reset Statistics
+          </button>
         </div>
       </Modal>
       {(showSuccess || showFail) && (
         <Modal open={openShareModal} setOpen={setOpenShareModal} title={`Success! The word is ${goalWord}`}>
-          <div className="flex flex-col justify-center">
+          <div className="flex flex-col justify-center mb-4">
             <pre className="bg-slate-200 dark:bg-slate-800 px-4 py-2 rounded-md">{utilities.generateShareText(guessMap, puzzleNumber, showFail)}</pre>
           </div>
+          <StatBlock gameLog={gameLogManager.gameLog} />
         </Modal>
       )}
     </div>
