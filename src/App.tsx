@@ -3,6 +3,7 @@ import "./App.css";
 import Modal from "./Modal";
 import { guessWords, validWords } from "./wordList";
 import { BackspaceIcon, BookOpenIcon } from "@heroicons/react/outline";
+import Toast, { ToastTypes } from "./Toast";
 
 type LetterState = {
   letter: string;
@@ -157,11 +158,11 @@ function App() {
   };
 
   const alreadyGuessed = (guess: string): boolean => {
-    return guessArray.slice(0, mapPointer[0]).some((row) => row.map(letter => letter.letter).join("") === guess);
+    return guessArray.slice(0, mapPointer[0]).some((row) => row.map((letter) => letter.letter).join("") === guess);
   };
 
   const clearError = () => {
-    setErrorMessage("")
+    setErrorMessage("");
     setError(false);
   };
 
@@ -181,7 +182,7 @@ function App() {
     const rows = guessArray.filter((row) => !row.every((letter) => letter.letter === ""));
     let shareText = `Word Guess `;
     shareText += `${validWords.indexOf(goalWord.toLocaleLowerCase())} `;
-    shareText += `${showFail ? 'X' : rows.length}/6`;
+    shareText += `${showFail ? "X" : rows.length}/6`;
     shareText += "\n\n";
 
     rows.forEach((row, index) => {
@@ -241,9 +242,9 @@ function App() {
           </div>
           <div className="flex flex-col">
             <div className="flex flex-col justify-center items-center h-20">
-              {error && <div className="button bg-yellow-400 dark:bg-yellow-700">{errorMessage}</div>}
-              {showFail && <div className="button bg-red-400 dark:bg-red-700">Sorry! The word was {goalWord}</div>}
-              {showSuccess && <div className="button bg-green-400 dark:bg-green-700">Success! The word is {goalWord}!</div>}
+              {error && <Toast type={ToastTypes.WARN} message={errorMessage} />}
+              {showFail && <Toast type={ToastTypes.ERROR} message={`Sorry! The word was ${goalWord}`} />}
+              {showSuccess && <Toast type={ToastTypes.SUCCESS} message={`Success! The word is ${goalWord}!`} />}
               <ul className="list-none flex flex-row space-x-4">
                 {(showFail || showSuccess) && (
                   <li>
