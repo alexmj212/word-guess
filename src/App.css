@@ -45,3 +45,17 @@ body {
 .position-match {
   @apply bg-green-500 dark:bg-green-700;
 }
+
+.grid-row {
+  @apply grid grid-cols-2 gap-4;
+}
+
+.grid-label {
+  @apply font-bold text-right;
+}
+
+.grid-field {
+  @apply font-semibold;
+}
+
+
