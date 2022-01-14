@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 
 export enum ToastTypes {
     DEFAULT = "bg-slate-300 dark:bg-slate-800",
