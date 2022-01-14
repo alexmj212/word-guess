@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import "./App.css";
 import Modal from "./Modal";
-import { guessWords, validWords } from "./wordList";
+import { alphabet, guessWords, validWords } from "./wordList";
 import { BackspaceIcon, BookOpenIcon } from "@heroicons/react/outline";
 import Toast, { ToastTypes } from "./Toast";
 import utilities from "./util";
@@ -17,21 +17,28 @@ export type LetterState = {
 };
 
 function App() {
-  const alphabet = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"];
-
+  // Game State
   const [guessMap, setGuessMap] = useState<LetterState[][]>([]);
   const [letterOptions, setLetterOptions] = useState<LetterState[]>([]);
   const [mapPointer, setMapPointer] = useState<number[]>([0, 0]);
-  const [disableSubmit, setDisableSubmit] = useState<boolean>(true);
-  const [disableBackspace, setDisableBackspace] = useState<boolean>(true);
   const [puzzleNumber, setPuzzleNumber] = useState<number>(0);
   const [goalWord, setGoalWord] = useState<string>("");
+
+  // Control States
+  const [disableSubmit, setDisableSubmit] = useState<boolean>(true);
+  const [disableBackspace, setDisableBackspace] = useState<boolean>(true);
+
+  // Message Handling
   const [error, setError] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string>("");
   const [showSuccess, setShowSuccess] = useState<boolean>(false);
   const [showFail, setShowFail] = useState<boolean>(false);
+
+  // Modals
   const [openRulesModal, setOpenRulesModal] = useState<boolean>(false);
   const [openShareModal, setOpenShareModal] = useState<boolean>(false);
+
+  // Default Letter
   const blankLetter: LetterState = {
     letter: "",
     containMatch: false,
@@ -41,29 +48,39 @@ function App() {
   };
 
   useEffect(() => {
-    generateEmptyGuessArray();
+    // Generate guess map and keyboard
+    generateEmptyGuessMap();
     generateAlphabet();
+
+    // Select a goal word at random
     const randomWord = validWords[Math.floor(Math.random() * validWords.length)];
     setGoalWord(randomWord.toLocaleUpperCase());
     setPuzzleNumber(validWords.indexOf(randomWord));
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
+    // If the puzzle is solved or failed, disable further submissions
     if (showSuccess || showFail) {
       setDisableSubmit(true);
     } else if (guessMap.length > 0 && mapPointer[0] >= 0 && mapPointer[0] < guessMap.length) {
+      // Disable submit as long as the row doesn't have 5 letters or the puzzle was solved
       setDisableSubmit(!showSuccess && guessMap[mapPointer[0]].map((letter) => letter.letter).join("").length !== 5);
+      // Disable backspace if there aren't any letters to remove yet
       setDisableBackspace(guessMap[mapPointer[0]].every((letter) => letter.letter === ""));
     }
   }, [guessMap, mapPointer, showSuccess, showFail]);
 
   useEffect(() => {
+    // On solved puzzle, show the success modal
     if (showSuccess) {
       setOpenShareModal(true);
     }
   }, [showSuccess]);
 
-  const generateEmptyGuessArray = () => {
+  /**
+   * Create map of empty guess rows
+   */
+  const generateEmptyGuessMap = () => {
     setGuessMap(
       [...Array(6).keys()].map(() => {
         return [blankLetter, blankLetter, blankLetter, blankLetter, blankLetter];
@@ -71,6 +88,9 @@ function App() {
     );
   };
 
+  /**
+   * Generate a blank keyboard
+   */
   const generateAlphabet = () => {
     setLetterOptions(
       alphabet.map((letter) => {
@@ -82,6 +102,10 @@ function App() {
     );
   };
 
+  /**
+   * Select a letter from the keyboard
+   * @param letter
+   */
   const onSelect = (letter: string) => {
     if (guessMap[mapPointer[0]].some((e) => e.letter === "")) {
       guessMap[mapPointer[0]][mapPointer[1]] = {
@@ -92,6 +116,9 @@ function App() {
     }
   };
 
+  /**
+   * Remove the last letter from a guess
+   */
   const onBackspace = () => {
     if (guessMap[mapPointer[0]].some((e) => e.letter !== "")) {
       guessMap[mapPointer[0]][mapPointer[1] - 1] = blankLetter;
@@ -100,8 +127,12 @@ function App() {
     clearError();
   };
 
+  /**
+   * Submit a completed word
+   */
   const onSubmit = () => {
     const guessedWord = guessMap[mapPointer[0]].map((letter) => letter.letter).join("");
+    // Ensure the word is contained within all the possible words
     if (guessWords.includes(guessedWord.toLocaleLowerCase()) || validWords.includes(guessedWord.toLocaleLowerCase())) {
       validateWord(guessedWord);
     } else {
@@ -110,54 +141,83 @@ function App() {
     }
   };
 
+  /**
+   * Given a word, generate hints and update keyboard.
+   * Display solved or failed puzzle.
+   * @param guess
+   * @returns
+   */
   const validateWord = (guess: string) => {
+    // Check if word has already been tried
     if (utilities.previousGuess(guess, guessMap, mapPointer)) {
       setError(true);
       setErrorMessage(`You already tried ${guess}.`);
       return;
     }
 
+    // Loop over array of letter from the guessed word
     guess.split("").forEach((letter, index) => {
+      // Search method for finding keyboard letter to be updated
       const letterSearch = (letterOption: LetterState) => letterOption.letter === letter;
+
+      // Check if letter is contained in goal word
       if (goalWord.indexOf(letter) >= 0) {
         guessMap[mapPointer[0]][index].containMatch = true;
+
+        // Update keyboard state
         const letterOption = letterOptions.find(letterSearch);
         if (letterOption) {
           letterOption.containMatch = true;
         }
 
+        // Check if letter matches the position
         if (goalWord.split("")[index] === letter) {
           guessMap[mapPointer[0]][index].positionMatch = true;
+
+          // Update keyboard state
           const letterOption = letterOptions.find(letterSearch);
           if (letterOption) {
             letterOption.positionMatch = true;
           }
         }
       } else {
+        // Gray out letter from keyboard if no match is found for the letter
+        guessMap[mapPointer[0]][index].noMatch = true;
+
+        // Update keyboard state
         const letterOption = letterOptions.find(letterSearch);
         if (letterOption) {
-          guessMap[mapPointer[0]][index].noMatch = true;
           letterOption.noMatch = true;
           // Add difficulty
           // letterOption.disabled = true;
         }
       }
     });
+
+    // Only check for success after the state of the letter is determined
+    // This ensures displayed result is accurate
+
     // Success
     if (guess === goalWord) {
       setShowSuccess(true);
       return;
     }
+
     // No success, next line
     if (mapPointer[0] < guessMap.length) {
       setMapPointer([mapPointer[0] + 1, 0]);
     }
-    // Out of guess
+
+    // Out of guesses
     if (mapPointer[0] === guessMap.length - 1) {
       setShowFail(true);
       return;
     }
+
+    // Update keyboard
     setLetterOptions([...letterOptions]);
+
+    // Update guess map
     setGuessMap([...guessMap]);
   };
 
