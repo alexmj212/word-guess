@@ -6,7 +6,7 @@ const utilities = {
       return "no-match";
     } else if (letterState.containMatch && !letterState.positionMatch) {
       return "contain-match";
-    } else if (letterState.containMatch && letterState.positionMatch) {
+    } else if (letterState.positionMatch) {
       return "position-match";
     } else {
       return "";
@@ -25,7 +25,7 @@ const utilities = {
           shareText += "⬛";
         } else if (letter.containMatch && !letter.positionMatch) {
           shareText += "🟨";
-        } else if (letter.containMatch && letter.positionMatch) {
+        } else if (letter.positionMatch) {
           shareText += "🟩";
         }
       });
