@@ -403,12 +403,6 @@ function App() {
         </Modal>
       )}
       <Modal open={openSettingsModal} setOpen={setOpenSettingsModal} title="Settings">
-        <dl>
-          <div className="grid-row">
-            <dt className="grid-label">Theme</dt>
-            <dd className="grid-field">Dark Mode</dd>
-          </div>
-        </dl>
         <div className="w-full text-center mt-4">
           <button
             className="underline pointer-cursor"
