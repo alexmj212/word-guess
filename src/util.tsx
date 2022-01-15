@@ -21,7 +21,7 @@ const utilities = {
 
     rows.forEach((row) => {
       row.forEach((letter) => {
-        if (letter.noMatch && !letter.containMatch && !letter.positionMatch) {
+        if (!letter.containMatch && !letter.positionMatch) {
           shareText += "⬛";
         } else if (letter.containMatch && !letter.positionMatch) {
           shareText += "🟨";
