@@ -20,11 +20,11 @@ export type LetterState = {
 
 function App() {
   // Game State
-  const [guessMap, setGuessMap] = useState<LetterState[][]>([]);
-  const [letterOptions, setLetterOptions] = useState<LetterState[]>([]);
-  const [mapPointer, setMapPointer] = useState<number[]>([0, 0]);
+  const [guessMap, setGuessMap] = useState<LetterState[][]>([]); // array of guesses
+  const [letterOptions, setLetterOptions] = useState<LetterState[]>([]); // keyboard
+  const [mapPointer, setMapPointer] = useState<[number, number]>([0, 0]); // x,y coords of cursor
   const [puzzleNumber, setPuzzleNumber] = useState<number>(0);
-  const [goalWord, setGoalWord] = useState<string>("");
+  const [goalWord, setGoalWord] = useState<string>(""); // the solution
 
   // Control States
   const [disableSubmit, setDisableSubmit] = useState<boolean>(true);
@@ -167,42 +167,48 @@ function App() {
 
     gameLogManager.updateGuessCount();
 
+    const guessMapRow = guessMap[mapPointer[0]];
+
     // Loop over array of letter from the guessed word
     guess.split("").forEach((letter, index) => {
       // Search method for finding keyboard letter to be updated
-      const letterSearch = (letterOption: LetterState) => letterOption.letter === letter;
+      const keyboardLetter = letterOptions.find((letterOption: LetterState) => letterOption.letter === letter) ?? blankLetter;
+
+      const guessMapLetter = guessMapRow[index];
 
       // Check if letter is contained in goal word
       if (goalWord.indexOf(letter) >= 0) {
-        guessMap[mapPointer[0]][index].containMatch = true;
+        guessMapLetter.containMatch = true;
 
         // Update keyboard state
-        const letterOption = letterOptions.find(letterSearch);
-        if (letterOption) {
-          letterOption.containMatch = true;
-        }
+        keyboardLetter.containMatch = true;
 
         // Check if letter matches the position
         if (goalWord.split("")[index] === letter) {
-          guessMap[mapPointer[0]][index].positionMatch = true;
+          guessMapLetter.positionMatch = true;
 
           // Update keyboard state
-          const letterOption = letterOptions.find(letterSearch);
-          if (letterOption) {
-            letterOption.positionMatch = true;
-          }
+          keyboardLetter.positionMatch = true;
         }
       } else {
         // Gray out letter from keyboard if no match is found for the letter
-        guessMap[mapPointer[0]][index].noMatch = true;
+        guessMapLetter.noMatch = true;
 
         // Update keyboard state
-        const letterOption = letterOptions.find(letterSearch);
-        if (letterOption) {
-          letterOption.noMatch = true;
-          // Add difficulty
-          // letterOption.disabled = true;
-        }
+        keyboardLetter.noMatch = true;
+        // Add difficulty
+        // keyboardLetter.disabled = true;
+      }
+
+      // Retroactively remove hints on duplicate letters
+      const dupeLetterMatch = new RegExp(letter, "g"); // regex for finding occurances of the current letter
+      const guessOccurenceCount = guess.match(dupeLetterMatch)?.length ?? 0; // count occurances of letter in guess word, 0 if none
+      const goalOccurenceCount = goalWord.match(dupeLetterMatch)?.length ?? 0; // count occurances of letter in goal word, 0 if none
+      // If the guess contains more occurances than the goal and it's not the first time the letter was guessed, remove hint
+      if (guessOccurenceCount > goalOccurenceCount && guess.indexOf(letter) < index) {
+        guessMapRow
+          .filter((guessLetter, filterIndex) => letter === guessLetter.letter && filterIndex < index) // retrieve previous duplicate letters
+          .forEach((guessLetter) => (guessLetter.containMatch = false)); // disable their hint
       }
     });
 
