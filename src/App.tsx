@@ -2,7 +2,9 @@ import React, { useEffect, useState } from "react";
 import "./App.css";
 import Modal from "./Modal";
 import { alphabet, guessWords, validWords } from "./wordList";
-import { BackspaceIcon, BookOpenIcon, ChartBarIcon } from "@heroicons/react/outline";
+import { BackspaceIcon, BookOpenIcon, ChartBarIcon, CogIcon } from "@heroicons/react/outline";
+import { useHotkeys } from "react-hotkeys-hook";
+
 import Toast, { ToastTypes } from "./Toast";
 import utilities from "./util";
 import GuessDisplay from "./GuessDisplay";
@@ -40,6 +42,7 @@ function App() {
   const [openRulesModal, setOpenRulesModal] = useState<boolean>(false);
   const [openShareModal, setOpenShareModal] = useState<boolean>(false);
   const [openStatsModal, setOpenStatsModal] = useState<boolean>(false);
+  const [openSettingsModal, setOpenSettingsModal] = useState<boolean>(false);
 
   // Initialize Game Log Manager
   const gameLogManager = new GameLogManager();
@@ -246,6 +249,11 @@ function App() {
     setError(false);
   };
 
+  // Handle keyboard input
+  useHotkeys(alphabet.join(", "), (key) => onSelect(key.key.toLocaleUpperCase()), [onSelect]);
+  useHotkeys("backspace", () => onBackspace(), [onBackspace]);
+  useHotkeys("enter", () => onSubmit(), [onSubmit]);
+
   return (
     <div className="w-full h-full">
       <div className="w-full max-w-4xl mx-auto my-2 px-2 sm:my-4 sm:px-4">
@@ -260,6 +268,11 @@ function App() {
             <li>
               <button title="Rules" onClick={() => setOpenRulesModal(true)}>
                 <BookOpenIcon className="w-8 h-8 inline-block" />
+              </button>
+            </li>
+            <li>
+              <button title="Settings" onClick={() => setOpenSettingsModal(true)}>
+                <CogIcon className="w-8 h-8 inline-block" />
               </button>
             </li>
           </ul>
@@ -384,6 +397,25 @@ function App() {
           <StatBlock gameLog={gameLogManager.gameLog} />
         </Modal>
       )}
+      <Modal open={openSettingsModal} setOpen={setOpenSettingsModal} title="Settings">
+        <dl>
+          <div className="grid-row">
+            <dt className="grid-label">Theme</dt>
+            <dd className="grid-field">Dark Mode</dd>
+          </div>
+        </dl>
+        <div className="w-full text-center mt-4">
+          <button
+            className="underline pointer-cursor"
+            onClick={() => {
+              gameLogManager.resetGameLog();
+              window.location.reload();
+            }}
+          >
+            Reset Statistics
+          </button>
+        </div>
+      </Modal>
     </div>
   );
 }
