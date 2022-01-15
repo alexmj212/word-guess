@@ -181,6 +181,7 @@ function App() {
 
       // Check if letter is contained in goal word
       if (goalWord.indexOf(letter) >= 0) {
+        guessMapLetter.noMatch = false;
         guessMapLetter.containMatch = true;
 
         // Update keyboard state
@@ -212,6 +213,10 @@ function App() {
         guessMapRow
           .filter((guessLetter, filterIndex) => letter === guessLetter.letter && filterIndex < index) // retrieve previous duplicate letters
           .forEach((guessLetter) => (guessLetter.containMatch = false)); // disable their hint
+      }
+      // If the guess already has a position match, hide hints for duplicate letter after
+      if (guessOccurenceCount > goalOccurenceCount && guess.indexOf(letter) < index && guessMapRow.some((guessLetter) => letter === guessLetter.letter && guessLetter.positionMatch)) {
+        guessMapLetter.containMatch = false;
       }
     });
 
