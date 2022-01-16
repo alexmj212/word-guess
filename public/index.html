@@ -4,11 +4,18 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#000000" />
-    <meta
-      name="description"
-      content="Word Guess Game"
-    />
+    <meta name="description" content="Guess the 5 letter" />
     <title>Word Guess Game</title>
+    <script>
+      // Manually determine theme immediately on load, set local storage to ensure availability to application
+      if (localStorage.theme === "dark" || (!("theme" in localStorage) && window.matchMedia("(prefers-color-scheme: dark)").matches)) {
+        document.documentElement.classList.add("dark");
+        localStorage.setItem('theme', 'dark');
+      } else {
+        document.documentElement.classList.remove("dark");
+        localStorage.setItem('theme', 'light');
+      }
+    </script>
   </head>
   <body>
     <noscript>You need to enable JavaScript to run this app.</noscript>

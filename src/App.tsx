@@ -11,6 +11,7 @@ import GuessDisplay from "./GuessDisplay";
 import Keyboard from "./Keyboard";
 import { GameLogManager } from "./GameLogManager";
 import StatBlock from "./StatBlock";
+import { RadioGroup } from "@headlessui/react";
 
 export type LetterState = {
   letter: string;
@@ -19,6 +20,19 @@ export type LetterState = {
   noMatch: boolean;
   disabled: boolean;
 };
+
+export const THEME_STORAGE_KEY = "theme";
+export const KEYBOARD_STORAGE_KEY = "keyboard";
+
+export enum ThemeOptions {
+  DARK = "dark",
+  LIGHT = "light",
+}
+
+export enum KeyboardState {
+  ALPHEBET = "alphabet",
+  QWERTY = "qwerty",
+}
 
 function App() {
   // Game State
@@ -31,6 +45,10 @@ function App() {
   // Control States
   const [disableSubmit, setDisableSubmit] = useState<boolean>(true);
   const [disableBackspace, setDisableBackspace] = useState<boolean>(true);
+
+  // Display State
+  const [keyboardDisplay, setKeyboardDisplay] = useState<KeyboardState>(localStorage.keyboard);
+  const [theme, setTheme] = useState<ThemeOptions>(localStorage.theme);
 
   // Message Handling
   const [error, setError] = useState<boolean>(false);
@@ -60,6 +78,7 @@ function App() {
     // Generate guess map and keyboard
     generateEmptyGuessMap();
     generateAlphabet();
+    determineKeyboard();
 
     // Show the rules on the first time
     setOpenRulesModal(gameLogManager.gameLog.gamesPlayed === 0 && gameLogManager.gameLog.guessCount === 0);
@@ -113,6 +132,15 @@ function App() {
         };
       })
     );
+  };
+
+  const determineKeyboard = () => {
+    if (localStorage.keyboard) {
+      setKeyboardDisplay(localStorage.keyboard);
+    } else {
+      localStorage.setItem(KEYBOARD_STORAGE_KEY, KeyboardState.QWERTY);
+      setKeyboardDisplay(localStorage.keyboard);
+    }
   };
 
   /**
@@ -252,6 +280,9 @@ function App() {
     setGuessMap([...guessMap]);
   };
 
+  /**
+   * Clear error state
+   */
   const clearError = () => {
     setErrorMessage("");
     setError(false);
@@ -261,6 +292,34 @@ function App() {
   useHotkeys(alphabet.join(", "), (key) => onSelect(key.key.toLocaleUpperCase()), [onSelect]);
   useHotkeys("backspace", () => onBackspace(), [onBackspace]);
   useHotkeys("enter", () => onSubmit(), [onSubmit]);
+
+  /**
+   * Handle theme switch, set storage key
+   * @param theme
+   */
+  const handleThemeSwitch = (theme: ThemeOptions) => {
+    switch (theme) {
+      case ThemeOptions.DARK:
+        document.documentElement.classList.add(ThemeOptions.DARK);
+        localStorage.setItem(THEME_STORAGE_KEY, ThemeOptions.DARK);
+        setTheme(ThemeOptions.DARK);
+        break;
+      case ThemeOptions.LIGHT:
+        document.documentElement.classList.remove(ThemeOptions.DARK);
+        localStorage.setItem(THEME_STORAGE_KEY, ThemeOptions.LIGHT);
+        setTheme(ThemeOptions.LIGHT);
+        break;
+    }
+  };
+
+  /**
+   * Handle keyboard display, set storage key, etc.
+   * @param keyboard
+   */
+  const handleKeyboardSwitch = (keyboard: KeyboardState) => {
+    localStorage.setItem(KEYBOARD_STORAGE_KEY, keyboard);
+    setKeyboardDisplay(keyboard);
+  };
 
   return (
     <div className="w-full h-full">
@@ -329,7 +388,7 @@ function App() {
                 </ul>
               )}
             </div>
-            <Keyboard qwerty letterOptions={letterOptions} onSelect={onSelect} disableCondition={(letter) => letter.disabled || showSuccess || showFail} />
+            <Keyboard qwerty={keyboardDisplay === KeyboardState.QWERTY} letterOptions={letterOptions} onSelect={onSelect} disableCondition={(letter) => letter.disabled || showSuccess || showFail} />
             <div className="flex flex-row flex-wrap justify-center">
               <button title="Backspace" className="button bg-red-400 dark:bg-red-700" onClick={onBackspace} disabled={showSuccess || showFail || disableBackspace}>
                 <BackspaceIcon className="h-10 w-10" />
@@ -357,7 +416,7 @@ function App() {
         <div className="flex flex-col">
           <ul className="list-disc list-inside">
             <li>The hidden word is 5 letters.</li>
-            <li>Select letters to spell a word.</li>
+            <li>Select or type letters to spell a word.</li>
             <li>Use "Guess Word" to see if you are correct.</li>
             <li>
               Use <BackspaceIcon className="h-6 w-6 inline-block" /> to remove letters from your guess.
@@ -406,6 +465,42 @@ function App() {
         </Modal>
       )}
       <Modal open={openSettingsModal} setOpen={setOpenSettingsModal} title="Settings">
+        <dl>
+          <div className="grid-row">
+            <dt className="grid-label">Theme</dt>
+            <dd className="grid-field">
+              <RadioGroup value={theme} onChange={handleThemeSwitch}>
+                {Object.values(ThemeOptions).map((themeOption) => (
+                  <RadioGroup.Option key={themeOption} value={themeOption}>
+                    {({ checked }) => (
+                      <div className="check-group">
+                        <div className={`check-radio ${checked ? "bg-blue-400" : "bg-white"}`}></div>
+                        <span className="check-label">{themeOption}</span>
+                      </div>
+                    )}
+                  </RadioGroup.Option>
+                ))}
+              </RadioGroup>
+            </dd>
+          </div>
+          <div className="grid-row">
+            <dt className="grid-label">Keyboard Display</dt>
+            <dd className="grid-field">
+              <RadioGroup value={keyboardDisplay} onChange={handleKeyboardSwitch}>
+                {Object.values(KeyboardState).map((keyboard) => (
+                  <RadioGroup.Option key={keyboard} value={keyboard}>
+                    {({ checked }) => (
+                      <div className="check-group">
+                        <div className={`check-radio ${checked ? "bg-blue-400" : "bg-white"}`}></div>
+                        <span className="check-label">{keyboard}</span>
+                      </div>
+                    )}
+                  </RadioGroup.Option>
+                ))}
+              </RadioGroup>
+            </dd>
+          </div>
+        </dl>
         <div className="w-full text-center mt-4">
           <button
             className="underline pointer-cursor"
