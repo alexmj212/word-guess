@@ -14,24 +14,38 @@ body {
   @apply hover:shadow-md;
   @apply hover:border-slate-500 dark:hover:border-slate-100;
   @apply disabled:opacity-30 hover:disabled:border-slate-400;
-  @apply active:shadow active:border-2 active:border-slate-300;
+  @apply active:scale-95 active:shadow active:border-2 active:border-slate-300;
   @apply dark:active:border-slate-500;
   @apply transition;
   @apply select-none;
+}
+
+.submit-button {
+  @apply animate-pulse;
+  @apply hover:animate-none;
 }
 
 .letter-option {
   @apply bg-slate-200;
   @apply hover:bg-slate-100;
   @apply dark:bg-slate-700 dark:hover:bg-slate-600;
-  @apply w-12 h-12;
-  @apply md:w-14 md:h-14;
+  @apply px-3 sm:px-4;
+  @apply w-4 h-12;
+  @apply md:w-4 md:h-14;
+}
+
+.qwerty-option {
+  @apply letter-option;
 }
 
 .guess-box {
   @apply border-2 border-slate-300 dark:border-slate-500;
   @apply w-12 h-12;
   @apply md:w-14 md:h-14;
+}
+
+.flex-break {
+  @apply basis-full h-0;
 }
 
 .no-match {
