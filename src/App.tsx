@@ -74,6 +74,7 @@ function App() {
     // If the puzzle is solved or failed, disable further submissions
     if (showSuccess || showFail) {
       setDisableSubmit(true);
+      setDisableBackspace(true);
     } else if (guessMap.length > 0 && mapPointer[0] >= 0 && mapPointer[0] < guessMap.length) {
       // Disable submit as long as the row doesn't have 5 letters or the puzzle was solved
       setDisableSubmit(!showSuccess && guessMap[mapPointer[0]].map((letter) => letter.letter).join("").length !== 5);
@@ -119,7 +120,7 @@ function App() {
    * @param letter
    */
   const onSelect = (letter: string) => {
-    if (guessMap[mapPointer[0]].some((e) => e.letter === "")) {
+    if (!(showFail || showSuccess) && guessMap[mapPointer[0]].some((e) => e.letter === "")) {
       guessMap[mapPointer[0]][mapPointer[1]] = {
         ...blankLetter,
         letter: letter,
@@ -132,7 +133,7 @@ function App() {
    * Remove the last letter from a guess
    */
   const onBackspace = () => {
-    if (guessMap[mapPointer[0]].some((e) => e.letter !== "")) {
+    if (!disableBackspace && guessMap[mapPointer[0]].some((e) => e.letter !== "")) {
       guessMap[mapPointer[0]][mapPointer[1] - 1] = blankLetter;
       setMapPointer([mapPointer[0], mapPointer[1] - 1]);
     }
@@ -143,14 +144,16 @@ function App() {
    * Submit a completed word
    */
   const onSubmit = () => {
-    const guessedWord = guessMap[mapPointer[0]].map((letter) => letter.letter).join("");
-    // Ensure the word is contained within all the possible words
-    if (guessWords.includes(guessedWord.toLocaleLowerCase()) || validWords.includes(guessedWord.toLocaleLowerCase())) {
-      validateWord(guessedWord);
-    } else {
-      gameLogManager.updateInvalidWordCount();
-      setError(true);
-      setErrorMessage(`${guessedWord} is not a word!`);
+    if (!disableSubmit) {
+      const guessedWord = guessMap[mapPointer[0]].map((letter) => letter.letter).join("");
+      // Ensure the word is contained within all the possible words
+      if (guessWords.includes(guessedWord.toLocaleLowerCase()) || validWords.includes(guessedWord.toLocaleLowerCase())) {
+        validateWord(guessedWord);
+      } else {
+        gameLogManager.updateInvalidWordCount();
+        setError(true);
+        setErrorMessage(`${guessedWord} is not a word!`);
+      }
     }
   };
 
@@ -282,7 +285,7 @@ function App() {
             </li>
           </ul>
         </div>
-        <div className="my-4 mx-auto md:max-w-xl flex flex-col justify-center">
+        <div className="my-4 mx-auto flex flex-col justify-center">
           <div className="flex flex-row flex-wrap mb-4 justify-center space-x-4">
             <button className="underline" onClick={() => window.location.reload()}>
               Get a New Puzzle
@@ -309,29 +312,29 @@ function App() {
               {(showFail || showSuccess) && (
                 <ul className="list-none flex flex-row space-x-4">
                   <li>
-                    <div className="underline cursor-pointer" onClick={() => setOpenShareModal(true)}>
+                    <button className="underline" onClick={() => setOpenShareModal(true)}>
                       Share Results
-                    </div>
+                    </button>
                   </li>
                   <li>
-                    <div className="underline cursor-pointer" onClick={() => setOpenStatsModal(true)}>
+                    <button className="underline" onClick={() => setOpenStatsModal(true)}>
                       View Your Stats
-                    </div>
+                    </button>
                   </li>
                   <li>
-                    <div className="underline cursor-pointer" onClick={() => window.location.reload()}>
+                    <button className="underline" onClick={() => window.location.reload()}>
                       Try another?
-                    </div>
+                    </button>
                   </li>
                 </ul>
               )}
             </div>
-            <Keyboard letterOptions={letterOptions} onSelect={onSelect} disableCondition={(letter) => letter.disabled || showSuccess || showFail} />
+            <Keyboard qwerty letterOptions={letterOptions} onSelect={onSelect} disableCondition={(letter) => letter.disabled || showSuccess || showFail} />
             <div className="flex flex-row flex-wrap justify-center">
-              <button className="button bg-red-400 dark:bg-red-700" onClick={onBackspace} disabled={showSuccess || showFail || disableBackspace}>
+              <button title="Backspace" className="button bg-red-400 dark:bg-red-700" onClick={onBackspace} disabled={showSuccess || showFail || disableBackspace}>
                 <BackspaceIcon className="h-10 w-10" />
               </button>
-              <button className="button bg-green-400 dark:bg-green-700" onClick={onSubmit} disabled={disableSubmit}>
+              <button title="Guess Word" className={`button ${!disableSubmit ? "submit-button" : ""} bg-green-400 dark:bg-green-700`} onClick={onSubmit} disabled={disableSubmit}>
                 Guess Word
               </button>
             </div>
