@@ -25,7 +25,7 @@ const StatBlock: React.FC<StatBlockType> = ({ gameLog }) => {
         <dd className="grid-field">{gameLog.maxWinStreak}</dd>
       </div>
       <div className="grid-row">
-        <dt className="grid-label">Win Precentage</dt>
+        <dt className="grid-label">Win Percentage</dt>
         <dd className="grid-field">{gameLog.gamesPlayed ? ((+gameLog.winCount / +gameLog.gamesPlayed) * 100).toFixed(2) : "0"}%</dd>
       </div>
       <div className="grid-row">
