@@ -7,9 +7,9 @@ body {
   @apply dark:text-white dark:bg-gray-900;
 }
 
-.button {
+.button-base {
   @apply flex justify-center items-center;
-  @apply text-xl rounded-md m-[2px] px-4 font-bold;
+  @apply text-xl rounded-md font-bold;
   @apply border-2 border-transparent;
   @apply hover:shadow-md;
   @apply hover:border-slate-500 dark:hover:border-slate-100;
@@ -20,9 +20,14 @@ body {
   @apply select-none;
 }
 
-.submit-button {
-  @apply animate-pulse;
-  @apply hover:animate-none;
+.button {
+  @apply button-base;
+  @apply m-[2px] px-4;
+}
+
+.button-action {
+  @apply button;
+  @apply bg-green-400 dark:bg-green-700;
 }
 
 .letter-option {
