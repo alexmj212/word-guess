@@ -1,4 +1,4 @@
-import React, { ReactFragment, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import "./App.css";
 import Modal from "./Modal";
 import { alphabet, guessWords, validWords } from "./wordList";
