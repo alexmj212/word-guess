@@ -42,8 +42,8 @@ const Modal: React.FC<ModalProps> = ({ title, open, setOpen, isStatic = false, c
                       <Dialog.Title as="h3" className="text-2xl leading-10 font-medium">
                         {title}
                       </Dialog.Title>
-                      <button className="button-base" ref={closeRef}>
-                        <XIcon className="w-8 h-8" onClick={() => setOpen(false)}></XIcon>
+                      <button className="button-base" onClick={() => setOpen(false)} ref={closeRef}>
+                        <XIcon className="w-8 h-8"></XIcon>
                       </button>
                     </div>
                     <div className="mt-2">{children}</div>

@@ -82,6 +82,7 @@ export class GameStateManager {
   }
 
   public saveGameState(newGameState: GameState) {
+    this.gameState = newGameState;
     this._saveGameState();
   }
 
