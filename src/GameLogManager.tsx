@@ -13,6 +13,8 @@ export type GameLog = {
   solvedWords: {
     [word: string]: number;
   };
+  lastUpdated: number;
+  lastWin: number;
 };
 
 const DefaultGameLog: GameLog = {
@@ -33,6 +35,8 @@ const DefaultGameLog: GameLog = {
     6: 0,
   },
   solvedWords: {},
+  lastUpdated: Date.now(),
+  lastWin: 0,
 };
 
 const GAME_LOG_KEY = "word-guess-log";
@@ -64,6 +68,7 @@ export class GameLogManager {
   }
 
   private _saveGameLog() {
+    this.gameLog.lastUpdated = Date.now();
     localStorage.setItem(GAME_LOG_KEY, JSON.stringify(this.gameLog));
   }
 
@@ -71,6 +76,7 @@ export class GameLogManager {
     this.gameLog.gamesPlayed += 1;
     this.gameLog.winCount += 1;
     this.gameLog.winStreak += 1;
+    this.gameLog.lastWin = Date.now();
     if (this.gameLog.winStreak > this.gameLog.maxWinStreak) {
       this.gameLog.maxWinStreak = this.gameLog.winStreak;
     }
