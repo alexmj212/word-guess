@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { ReactFragment, useEffect, useState } from "react";
 import "./App.css";
 import Modal from "./Modal";
 import { alphabet, guessWords, validWords } from "./wordList";
@@ -12,6 +12,8 @@ import Keyboard from "./Keyboard";
 import { GameLogManager } from "./GameLogManager";
 import StatBlock from "./StatBlock";
 import { RadioGroup } from "@headlessui/react";
+import { DefaultLetter, GameState, GameStateManager } from "./GameStateManager";
+import ConfirmationDialog from "./ConfirmationDialog";
 
 export type LetterState = {
   letter: string;
@@ -51,7 +53,7 @@ function App() {
   const [theme, setTheme] = useState<ThemeOptions>(localStorage.theme);
 
   // Message Handling
-  const [error, setError] = useState<boolean>(false);
+  const [showError, setShowError] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string>("");
   const [showSuccess, setShowSuccess] = useState<boolean>(false);
   const [showFail, setShowFail] = useState<boolean>(false);
@@ -61,34 +63,43 @@ function App() {
   const [openShareModal, setOpenShareModal] = useState<boolean>(false);
   const [openStatsModal, setOpenStatsModal] = useState<boolean>(false);
   const [openSettingsModal, setOpenSettingsModal] = useState<boolean>(false);
+  const [openConfirmationModal, setOpenConfirmationModal] = useState<boolean>(false);
 
   // Initialize Game Log Manager
   const gameLogManager = new GameLogManager();
 
-  // Default Letter
-  const blankLetter: LetterState = {
-    letter: "",
-    containMatch: false,
-    positionMatch: false,
-    noMatch: false,
-    disabled: false,
-  };
+  // Initialize Game State Manager
+  const gameStateManager = new GameStateManager();
 
+  /**
+   * Execute setup on initial load
+   */
   useEffect(() => {
-    // Generate guess map and keyboard
-    generateEmptyGuessMap();
-    generateAlphabet();
+    loadGameState(gameStateManager.gameState);
     determineKeyboard();
-
     // Show the rules on the first time
     setOpenRulesModal(gameLogManager.gameLog.gamesPlayed === 0 && gameLogManager.gameLog.guessCount === 0);
-
-    // Select a goal word at random
-    const randomWord = validWords[Math.floor(Math.random() * validWords.length)];
-    setGoalWord(randomWord.toLocaleUpperCase());
-    setPuzzleNumber(validWords.indexOf(randomWord));
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
+  /**
+   * Execute on game state change
+   */
+  useEffect(() => {
+    gameStateManager.saveGameState({
+      guessMap: guessMap,
+      letterOptions: letterOptions,
+      cursorPointer: mapPointer,
+      showError: showError,
+      showFail: showFail,
+      showSuccess: showSuccess,
+      errorMessage: errorMessage,
+      puzzleNumber: puzzleNumber,
+    });
+  }, [guessMap, letterOptions, mapPointer, showSuccess, showFail, showError, errorMessage, puzzleNumber]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  /**
+   * Execute on game display changes
+   */
   useEffect(() => {
     // If the puzzle is solved or failed, disable further submissions
     if (showSuccess || showFail) {
@@ -100,8 +111,11 @@ function App() {
       // Disable backspace if there aren't any letters to remove yet
       setDisableBackspace(guessMap[mapPointer[0]].every((letter) => letter.letter === ""));
     }
-  }, [guessMap, mapPointer, showSuccess, showFail]);
+  }, [guessMap, letterOptions, mapPointer, showSuccess, showFail]);
 
+  /**
+   * Execute on Success only
+   */
   useEffect(() => {
     // On solved puzzle, show the success modal
     if (showSuccess) {
@@ -110,28 +124,56 @@ function App() {
   }, [showSuccess]);
 
   /**
-   * Create map of empty guess rows
+   * Select a puzzle from the list of options and set the game state as needed
    */
-  const generateEmptyGuessMap = () => {
-    setGuessMap(
-      [...Array(6).keys()].map(() => {
-        return [blankLetter, blankLetter, blankLetter, blankLetter, blankLetter];
-      })
-    );
+  const generateNewPuzzle = () => {
+    // Generate a new puzzle
+    const randomWord = validWords[Math.floor(Math.random() * validWords.length)];
+    setGoalWord(randomWord.toLocaleUpperCase());
+    setPuzzleNumber(validWords.indexOf(randomWord));
+    gameStateManager.saveGameState({
+      ...gameStateManager.generateNewGameState(),
+      puzzleNumber: puzzleNumber,
+    });
   };
 
   /**
-   * Generate a blank keyboard
+   * Load the saved game state
+   * @param gameState
    */
-  const generateAlphabet = () => {
-    setLetterOptions(
-      alphabet.map((letter) => {
-        return {
-          ...blankLetter,
-          letter: letter,
-        };
-      })
-    );
+  const loadGameState = (gameState: GameState) => {
+    setGuessMap(gameState.guessMap);
+    setLetterOptions(gameState.letterOptions);
+    setMapPointer(gameState.cursorPointer);
+    setShowError(gameState.showError);
+    setErrorMessage(gameState.errorMessage);
+    setShowFail(gameState.showFail);
+    setShowSuccess(gameState.showSuccess);
+    setPuzzleNumber(gameState.puzzleNumber);
+    // Load a previous Puzzle
+    if (gameStateManager.gameState.puzzleNumber !== 0) {
+      setGoalWord(validWords[gameStateManager.gameState.puzzleNumber].toLocaleUpperCase());
+      setPuzzleNumber(gameStateManager.gameState.puzzleNumber);
+    } else {
+      generateNewPuzzle();
+    }
+  };
+
+  /**
+   * Performs a hard reset of the game state
+   * Depends on deep copy hack of the default game state
+   */
+  const resetGameState = () => {
+    gameStateManager.resetGameState();
+    const defaultState: GameState = gameStateManager.generateNewGameState();
+    setGuessMap(defaultState.guessMap);
+    setLetterOptions(defaultState.letterOptions);
+    setMapPointer(defaultState.cursorPointer);
+    setShowError(defaultState.showError);
+    setErrorMessage(defaultState.errorMessage);
+    setShowFail(defaultState.showFail);
+    setShowSuccess(defaultState.showSuccess);
+    generateNewPuzzle();
   };
 
   const determineKeyboard = () => {
@@ -150,7 +192,7 @@ function App() {
   const onSelect = (letter: string) => {
     if (!(showFail || showSuccess) && guessMap[mapPointer[0]].some((e) => e.letter === "")) {
       guessMap[mapPointer[0]][mapPointer[1]] = {
-        ...blankLetter,
+        ...DefaultLetter,
         letter: letter,
       };
       setMapPointer([mapPointer[0], mapPointer[1] + 1]);
@@ -162,7 +204,7 @@ function App() {
    */
   const onBackspace = () => {
     if (!disableBackspace && guessMap[mapPointer[0]].some((e) => e.letter !== "")) {
-      guessMap[mapPointer[0]][mapPointer[1] - 1] = blankLetter;
+      guessMap[mapPointer[0]][mapPointer[1] - 1] = DefaultLetter;
       setMapPointer([mapPointer[0], mapPointer[1] - 1]);
     }
     clearError();
@@ -179,7 +221,7 @@ function App() {
         validateWord(guessedWord);
       } else {
         gameLogManager.updateInvalidWordCount();
-        setError(true);
+        setShowError(true);
         setErrorMessage(`${guessedWord} is not a word!`);
       }
     }
@@ -194,7 +236,7 @@ function App() {
   const validateWord = (guess: string) => {
     // Check if word has already been tried
     if (utilities.previousGuess(guess, guessMap, mapPointer)) {
-      setError(true);
+      setShowError(true);
       setErrorMessage(`You already tried ${guess}.`);
       return;
     }
@@ -206,7 +248,7 @@ function App() {
     // Loop over array of letter from the guessed word
     guess.split("").forEach((letter, index) => {
       // Search method for finding keyboard letter to be updated
-      const keyboardLetter = letterOptions.find((letterOption: LetterState) => letterOption.letter === letter) ?? blankLetter;
+      const keyboardLetter = letterOptions.find((letterOption: LetterState) => letterOption.letter === letter) ?? DefaultLetter;
 
       const guessMapLetter = guessMapRow[index];
 
@@ -285,7 +327,7 @@ function App() {
    */
   const clearError = () => {
     setErrorMessage("");
-    setError(false);
+    setShowError(false);
   };
 
   // Handle keyboard input
@@ -321,6 +363,32 @@ function App() {
     setKeyboardDisplay(keyboard);
   };
 
+  /**
+   * Resets the statistics and resets the game
+   */
+  const handleStatisticsReset = () => {
+    setOpenConfirmationModal(false);
+    gameLogManager.resetGameLog();
+    resetGameState();
+  };
+
+  /**
+   * Generic Function to generate a Confirmation dialog
+   * @param onConfirm
+   * @param onCancel
+   * @param dialogText
+   * @returns
+   */
+  const generateConfirmationDialogContents = (onConfirm: () => void, onCancel: () => void, dialogText: string) => {
+    return (
+      <Modal open={openConfirmationModal} setOpen={setOpenConfirmationModal} title="Confirm">
+        <ConfirmationDialog onConfirm={onConfirm} onCancel={onCancel} confirmText="Reset">
+          {dialogText}
+        </ConfirmationDialog>
+      </Modal>
+    );
+  };
+
   return (
     <div className="w-full h-full">
       <div className="w-full max-w-4xl mx-auto my-2 px-2 sm:my-4 sm:px-4">
@@ -346,7 +414,7 @@ function App() {
         </div>
         <div className="my-4 mx-auto flex flex-col justify-center">
           <div className="flex flex-row flex-wrap mb-4 justify-center space-x-4">
-            <button className="underline" onClick={() => window.location.reload()}>
+            <button className="underline" onClick={() => resetGameState()}>
               Get a New Puzzle
             </button>
             <button
@@ -365,7 +433,7 @@ function App() {
           <GuessDisplay guessMap={guessMap} mapPointer={mapPointer} />
           <div className="flex flex-col">
             <div className="flex flex-col justify-center items-center h-20">
-              {error && <Toast type={ToastTypes.WARN} message={errorMessage} />}
+              {showError && <Toast type={ToastTypes.WARN} message={errorMessage} />}
               {showFail && <Toast type={ToastTypes.ERROR} message={`Sorry! The word was ${goalWord}`} />}
               {showSuccess && <Toast type={ToastTypes.SUCCESS} message={`Success! The word is ${goalWord}!`} />}
               {(showFail || showSuccess) && (
@@ -381,7 +449,7 @@ function App() {
                     </button>
                   </li>
                   <li>
-                    <button className="underline" onClick={() => window.location.reload()}>
+                    <button className="underline" onClick={() => resetGameState()}>
                       Try another?
                     </button>
                   </li>
@@ -393,7 +461,7 @@ function App() {
               <button title="Backspace" className="button bg-red-400 dark:bg-red-700" onClick={onBackspace} disabled={showSuccess || showFail || disableBackspace}>
                 <BackspaceIcon className="h-10 w-10" />
               </button>
-              <button title="Guess Word" className={`button ${!disableSubmit ? "submit-button" : ""} bg-green-400 dark:bg-green-700`} onClick={onSubmit} disabled={disableSubmit}>
+              <button title="Guess Word" className={`button-action`} onClick={onSubmit} disabled={disableSubmit}>
                 Guess Word
               </button>
             </div>
@@ -423,7 +491,6 @@ function App() {
             </li>
             <li>You will gets hints if your letters are in the hidden word.</li>
             <li>You have 6 tries to guess the word.</li>
-            <li>Refresh the page to get a new puzzle.</li>
           </ul>
         </div>
         <div>
@@ -445,15 +512,10 @@ function App() {
       <Modal open={openStatsModal} setOpen={setOpenStatsModal} title="Word Guess Statistics">
         <StatBlock gameLog={gameLogManager.gameLog} />
         <div className="w-full text-center mt-4">
-          <button
-            className="underline pointer-cursor"
-            onClick={() => {
-              gameLogManager.resetGameLog();
-              window.location.reload();
-            }}
-          >
+          <button className="underline pointer-cursor" onClick={() => setOpenConfirmationModal(true)}>
             Reset Statistics
           </button>
+          {generateConfirmationDialogContents(handleStatisticsReset, () => setOpenConfirmationModal(false), "Are you sure you want to reset your statistics?")}
         </div>
       </Modal>
       {(showSuccess || showFail) && (
@@ -501,17 +563,6 @@ function App() {
             </dd>
           </div>
         </dl>
-        <div className="w-full text-center mt-4">
-          <button
-            className="underline pointer-cursor"
-            onClick={() => {
-              gameLogManager.resetGameLog();
-              window.location.reload();
-            }}
-          >
-            Reset Statistics
-          </button>
-        </div>
       </Modal>
     </div>
   );
