@@ -9,6 +9,5 @@ Guess the hidden word!
 - Use the backspace to remove letters from your guess.
 - You will gets hints if your letters are in the hidden word.
 - You have 6 tries to guess the word.
-- Refresh the page to get a new puzzle.
 
 https://alexmj212.dev/word-guess
