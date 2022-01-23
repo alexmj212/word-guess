@@ -42,7 +42,7 @@ function App() {
   const [letterOptions, setLetterOptions] = useState<LetterState[]>([]); // keyboard
   const [mapPointer, setMapPointer] = useState<[number, number]>([0, 0]); // x,y coords of cursor
   const [puzzleNumber, setPuzzleNumber] = useState<number>(0);
-  const [goalWord, setGoalWord] = useState<string>(""); // the solution
+  const [solution, setSolution] = useState<string>(""); // the solution
 
   // Control States
   const [disableSubmit, setDisableSubmit] = useState<boolean>(true);
@@ -129,7 +129,7 @@ function App() {
   const generateNewPuzzle = () => {
     // Generate a new puzzle
     const randomWord = validWords[Math.floor(Math.random() * validWords.length)];
-    setGoalWord(randomWord.toLocaleUpperCase());
+    setSolution(randomWord.toLocaleUpperCase());
     setPuzzleNumber(validWords.indexOf(randomWord));
     gameStateManager.saveGameState({
       ...gameStateManager.generateNewGameState(),
@@ -152,7 +152,7 @@ function App() {
     setPuzzleNumber(gameState.puzzleNumber);
     // Load a previous Puzzle
     if (gameStateManager.gameState.puzzleNumber !== 0) {
-      setGoalWord(validWords[gameStateManager.gameState.puzzleNumber].toLocaleUpperCase());
+      setSolution(validWords[gameStateManager.gameState.puzzleNumber].toLocaleUpperCase());
       setPuzzleNumber(gameStateManager.gameState.puzzleNumber);
     } else {
       generateNewPuzzle();
@@ -253,7 +253,7 @@ function App() {
       const guessMapLetter = guessMapRow[index];
 
       // Check if letter is contained in goal word
-      if (goalWord.indexOf(letter) >= 0) {
+      if (solution.indexOf(letter) >= 0) {
         guessMapLetter.noMatch = false;
         guessMapLetter.containMatch = true;
 
@@ -261,7 +261,7 @@ function App() {
         keyboardLetter.containMatch = true;
 
         // Check if letter matches the position
-        if (goalWord.split("")[index] === letter) {
+        if (solution.split("")[index] === letter) {
           guessMapLetter.positionMatch = true;
 
           // Update keyboard state
@@ -280,7 +280,7 @@ function App() {
       // Retroactively remove hints on duplicate letters
       const dupeLetterMatch = new RegExp(letter, "g"); // regex for finding occurances of the current letter
       const guessOccurenceCount = guess.match(dupeLetterMatch)?.length ?? 0; // count occurances of letter in guess word, 0 if none
-      const goalOccurenceCount = goalWord.match(dupeLetterMatch)?.length ?? 0; // count occurances of letter in goal word, 0 if none
+      const goalOccurenceCount = solution.match(dupeLetterMatch)?.length ?? 0; // count occurances of letter in goal word, 0 if none
       // If the guess contains more occurances than the goal and it's not the first time the letter was guessed, remove hint
       if (guessOccurenceCount > goalOccurenceCount && guess.indexOf(letter) < index) {
         guessMapRow
@@ -297,7 +297,7 @@ function App() {
     // This ensures displayed result is accurate
 
     // Success
-    if (guess === goalWord) {
+    if (guess === solution) {
       gameLogManager.updateWinCount(guess, mapPointer[0] + 1);
       setShowSuccess(true);
       return;
@@ -434,8 +434,8 @@ function App() {
           <div className="flex flex-col">
             <div className="flex flex-col justify-center items-center h-20">
               {showError && <Toast type={ToastTypes.WARN} message={errorMessage} />}
-              {showFail && <Toast type={ToastTypes.ERROR} message={`Sorry! The word was ${goalWord}`} />}
-              {showSuccess && <Toast type={ToastTypes.SUCCESS} message={`Success! The word is ${goalWord}!`} />}
+              {showFail && <Toast type={ToastTypes.ERROR} message={`Sorry! The word was ${solution}`} />}
+              {showSuccess && <Toast type={ToastTypes.SUCCESS} message={`Success! The word is ${solution}!`} />}
               {(showFail || showSuccess) && (
                 <ul className="list-none flex flex-row space-x-4">
                   <li>
@@ -519,7 +519,7 @@ function App() {
         </div>
       </Modal>
       {(showSuccess || showFail) && (
-        <Modal open={openShareModal} setOpen={setOpenShareModal} title={`Success! The word is ${goalWord}`}>
+        <Modal open={openShareModal} setOpen={setOpenShareModal} title={showSuccess ? `Success! The word is ${solution}` : `Sorry! The word was ${solution}`}>
           <div className="flex flex-col justify-center mb-4">
             <pre className="bg-slate-200 dark:bg-slate-800 px-4 py-2 rounded-md">{utilities.generateShareText(guessMap, puzzleNumber, showFail)}</pre>
           </div>

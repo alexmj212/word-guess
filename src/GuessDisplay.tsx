@@ -17,11 +17,8 @@ const GuessDisplay: React.FC<GuessDisplayType> = ({ guessMap, mapPointer }) => {
       {guessMap.map((guessRow, row) => (
         <div key={row} className="flex flex-row justify-center">
           {guessRow.map((letter: LetterState, index) => (
-            <div key={row + index}>
-              <div className={`button guess-box letter font-bold ${row < mapPointer[0] && !letter.containMatch && !letter.positionMatch ? "no-match" : ""} ${utilities.determineLetterClass(letter)}`}>
-                {cursor(row, index, letter)}
-                <br />
-              </div>
+            <div key={row + index} className={`button guess-box letter font-bold ${row < mapPointer[0] && !letter.containMatch && !letter.positionMatch ? "no-match" : ""} ${utilities.determineLetterClass(letter)}`}>
+              {cursor(row, index, letter)}
             </div>
           ))}
         </div>
