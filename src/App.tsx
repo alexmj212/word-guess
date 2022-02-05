@@ -12,7 +12,7 @@ import Keyboard from "./Keyboard";
 import { GameLogManager } from "./GameLogManager";
 import StatBlock from "./StatBlock";
 import { RadioGroup } from "@headlessui/react";
-import { DefaultLetter, DifficultyOptions, GameState, GameStateManager } from "./GameStateManager";
+import { DefaultLetter, difficultyDescriptions, DifficultyOptions, GameState, GameStateManager } from "./GameStateManager";
 import ConfirmationModalContextProvider from "./ConfirmationDialogContext";
 import { ButtonWithConfirmation } from "./ButtonWithConfirmation";
 import { RadioWithConfirmation } from "./RadioWithConfirmation";
@@ -203,7 +203,7 @@ function App() {
    * @param letter
    */
   const onSelect = (letter: string) => {
-    if (!(showFail || showSuccess) && guessMap[mapPointer[0]].some((e) => e.letter === "")) {
+    if (!(showFail || showSuccess) && guessMap[mapPointer[0]].some((e) => e.letter === "") && !letterOptions.find(l => l.letter === letter)?.disabled) {
       guessMap[mapPointer[0]][mapPointer[1]] = {
         ...DefaultLetter,
         letter: letter,
@@ -417,7 +417,7 @@ function App() {
           </ul>
         </div>
         <div className="my-4 mx-auto flex flex-col justify-center">
-          <div className="flex flex-row flex-wrap mb-4 justify-center space-x-4">
+          <div className="flex flex-row flex-wrap mb-2 justify-center space-x-4">
             <button className="underline" onClick={() => resetGameState()}>
               Get a New Puzzle
             </button>
@@ -433,6 +433,14 @@ function App() {
             >
               Forfeit Puzzle
             </button>
+          </div>
+          <div className="flex flex-row flex-wrap mb-4 justify-center space-x-4">
+            <span>
+              <strong>Diffculty Mode:</strong>{" "}
+              <button className="underline capitalize" onClick={() => setOpenSettingsModal(true)}>
+                {difficulty}
+              </button>
+            </span>
           </div>
           <GuessDisplay guessMap={guessMap} mapPointer={mapPointer} />
           <div className="flex flex-col">
@@ -536,7 +544,7 @@ function App() {
             <dt className="grid-label">Difficulty</dt>
             <dd className="grid-field">
               <ConfirmationModalContextProvider confirmText="Changing difficulty requires the current game to be reset. Are you sure you want to reset the game?" confirmButtonText="Reset">
-                <RadioWithConfirmation keys={Object.values(DifficultyOptions)} selectedValue={difficulty} onChange={handleDifficultyChange}></RadioWithConfirmation>
+                <RadioWithConfirmation keys={Object.values(DifficultyOptions)} selectedValue={difficulty} keyDescription={difficultyDescriptions} onChange={handleDifficultyChange}></RadioWithConfirmation>
               </ConfirmationModalContextProvider>
             </dd>
           </div>
