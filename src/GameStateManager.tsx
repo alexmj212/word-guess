@@ -65,7 +65,7 @@ export class GameStateManager {
         return JSON.parse(potentialGameState);
       } else {
         this.gameState = JSON.parse(JSON.stringify(DefaultGameState));
-        this._saveGameState();
+        this._commitGameState();
         return JSON.parse(JSON.stringify(DefaultGameState));
       }
     } catch {
@@ -73,7 +73,7 @@ export class GameStateManager {
     }
   }
 
-  private _saveGameState() {
+  private _commitGameState() {
     localStorage.setItem(GAME_STATE_KEY, JSON.stringify(this.gameState));
   }
 
@@ -83,11 +83,11 @@ export class GameStateManager {
 
   public saveGameState(newGameState: GameState) {
     this.gameState = newGameState;
-    this._saveGameState();
+    this._commitGameState();
   }
 
   public resetGameState() {
     this.gameState = this.generateNewGameState();
-    this._saveGameState();
+    this._commitGameState();
   }
 }
