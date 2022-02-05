@@ -22,11 +22,12 @@ body {
 
 .button {
   @apply button-base;
-  @apply m-[2px] px-4;
+  @apply m-[2px] px-1;
 }
 
 .button-action {
   @apply button;
+  @apply md:px-4;
   @apply bg-green-400 dark:bg-green-700;
 }
 
@@ -34,9 +35,9 @@ body {
   @apply bg-slate-200;
   @apply hover:bg-slate-100;
   @apply dark:bg-slate-700 dark:hover:bg-slate-600;
-  @apply px-3 sm:px-4;
-  @apply w-4 h-12;
-  @apply md:w-4 md:h-14;
+  @apply p-0;
+  @apply w-8 h-12;
+  @apply md:w-12 md:h-12;
 }
 
 .qwerty-option {

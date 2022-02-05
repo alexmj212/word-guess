@@ -20,23 +20,42 @@ const Keyboard: React.FC<KeyboardType> = ({ letterOptions, qwerty, onSelect, dis
 
   return (
     <>
-      <div className="flex flex-row flex-wrap justify-center">
-        {letterOptions.map((letter, index) => (
-          <React.Fragment key={letter.letter}>
-            <button onClick={() => onSelect(letter.letter)} value={letter.letter} title={letter.letter} className={`button letter-option qwerty-option ${utilities.determineLetterClass(letter)}`} disabled={disableSelect(letter)}>
-              {letter.letter}
-            </button>
-            {qwerty ? (index === 9 || index === 18) && <div className="flex-break"></div> : index % 10 === 9 && <div className="flex-break"></div>}
-          </React.Fragment>
-        ))}
-      </div>
-      <div className="flex flex-row flex-wrap justify-center">
-        <button title="Backspace" className="button bg-red-400 dark:bg-red-700" onClick={onBackspace} disabled={disableBackspace}>
-          <BackspaceIcon className="h-10 w-10" />
-        </button>
-        <button title="Guess Word" className={`button-action`} onClick={onSubmit} disabled={disableSubmit}>
-          Guess Word
-        </button>
+      <div className="flex flex-col justify-center w-full mx-auto">
+        <div className="flex flex-row justify-center">
+          {letterOptions.slice(0, 10).map((letter) => (
+            <React.Fragment key={letter.letter}>
+              <button onClick={() => onSelect(letter.letter)} value={letter.letter} title={letter.letter} className={`button letter-option qwerty-option ${utilities.determineLetterClass(letter)}`} disabled={disableSelect(letter)}>
+                {letter.letter}
+              </button>
+            </React.Fragment>
+          ))}
+        </div>
+        <div className="flex flex-row justify-center">
+          {" "}
+          {letterOptions.slice(10, 19).map((letter) => (
+            <React.Fragment key={letter.letter}>
+              <button onClick={() => onSelect(letter.letter)} value={letter.letter} title={letter.letter} className={`button letter-option qwerty-option ${utilities.determineLetterClass(letter)}`} disabled={disableSelect(letter)}>
+                {letter.letter}
+              </button>
+            </React.Fragment>
+          ))}
+        </div>
+        <div className="flex flex-row justify-center">
+          {" "}
+          <button title="Backspace" className="button-action bg-red-400 dark:bg-red-700" onClick={onBackspace} disabled={disableBackspace}>
+            <BackspaceIcon className="h-10 w-10" />
+          </button>
+          {letterOptions.slice(19, letterOptions.length).map((letter) => (
+            <React.Fragment key={letter.letter}>
+              <button onClick={() => onSelect(letter.letter)} value={letter.letter} title={letter.letter} className={`button letter-option qwerty-option ${utilities.determineLetterClass(letter)}`} disabled={disableSelect(letter)}>
+                {letter.letter}
+              </button>
+            </React.Fragment>
+          ))}
+          <button title="Guess Word" className={`button-action`} onClick={onSubmit} disabled={disableSubmit}>
+            Enter
+          </button>
+        </div>
       </div>
     </>
   );
