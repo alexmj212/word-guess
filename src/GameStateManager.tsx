@@ -1,6 +1,11 @@
 import { LetterState } from "./App";
 import { alphabet } from "./wordList";
 
+export enum DifficultyOptions {
+  NORMAL = "normal",
+  HARD = "hard",
+}
+
 export type GameState = {
   guessMap: LetterState[][];
   letterOptions: LetterState[];
@@ -78,7 +83,7 @@ export class GameStateManager {
   }
 
   public generateNewGameState(): GameState {
-    return JSON.parse(JSON.stringify(DefaultGameState))
+    return JSON.parse(JSON.stringify(DefaultGameState));
   }
 
   public saveGameState(newGameState: GameState) {

@@ -12,8 +12,10 @@ import Keyboard from "./Keyboard";
 import { GameLogManager } from "./GameLogManager";
 import StatBlock from "./StatBlock";
 import { RadioGroup } from "@headlessui/react";
-import { DefaultLetter, GameState, GameStateManager } from "./GameStateManager";
-import ConfirmationDialog from "./ConfirmationDialog";
+import { DefaultLetter, DifficultyOptions, GameState, GameStateManager } from "./GameStateManager";
+import ConfirmationModalContextProvider from "./ConfirmationDialogContext";
+import { ButtonWithConfirmation } from "./ButtonWithConfirmation";
+import { RadioWithConfirmation } from "./RadioWithConfirmation";
 
 export type LetterState = {
   letter: string;
@@ -25,6 +27,7 @@ export type LetterState = {
 
 export const THEME_STORAGE_KEY = "theme";
 export const KEYBOARD_STORAGE_KEY = "keyboard";
+export const DIFFICULTY_KEY = "difficulty";
 
 export enum ThemeOptions {
   DARK = "dark",
@@ -41,8 +44,9 @@ function App() {
   const [guessMap, setGuessMap] = useState<LetterState[][]>([]); // array of guesses
   const [letterOptions, setLetterOptions] = useState<LetterState[]>([]); // keyboard
   const [mapPointer, setMapPointer] = useState<[number, number]>([0, 0]); // x,y coords of cursor
-  const [puzzleNumber, setPuzzleNumber] = useState<number>(0);
+  const [puzzleNumber, setPuzzleNumber] = useState<number>(0); // in the index of the puzzle from the array of solutions
   const [solution, setSolution] = useState<string>(""); // the solution
+  const [difficulty, setDifficulty] = useState<DifficultyOptions>(DifficultyOptions.NORMAL); // the game difficulty
 
   // Control States
   const [disableSubmit, setDisableSubmit] = useState<boolean>(true);
@@ -63,7 +67,6 @@ function App() {
   const [openShareModal, setOpenShareModal] = useState<boolean>(false);
   const [openStatsModal, setOpenStatsModal] = useState<boolean>(false);
   const [openSettingsModal, setOpenSettingsModal] = useState<boolean>(false);
-  const [openConfirmationModal, setOpenConfirmationModal] = useState<boolean>(false);
 
   // Initialize Game Log Manager
   const gameLogManager = new GameLogManager();
@@ -77,6 +80,7 @@ function App() {
   useEffect(() => {
     loadGameState(gameStateManager.gameState);
     determineKeyboard();
+    determineDifficulty();
     // Show the rules on the first time
     setOpenRulesModal(gameLogManager.gameLog.gamesPlayed === 0 && gameLogManager.gameLog.guessCount === 0);
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
@@ -185,6 +189,15 @@ function App() {
     }
   };
 
+  const determineDifficulty = () => {
+    if (localStorage.difficulty) {
+      setDifficulty(localStorage.difficulty);
+    } else {
+      localStorage.setItem(DIFFICULTY_KEY, difficulty);
+      setDifficulty(localStorage.difficulty);
+    }
+  };
+
   /**
    * Select a letter from the keyboard
    * @param letter
@@ -274,7 +287,9 @@ function App() {
         // Update keyboard state
         keyboardLetter.noMatch = true;
         // Add difficulty
-        // keyboardLetter.disabled = true;
+        if (difficulty === DifficultyOptions.HARD) {
+          keyboardLetter.disabled = true;
+        }
       }
 
       // Retroactively remove hints on duplicate letters
@@ -367,26 +382,15 @@ function App() {
    * Resets the statistics and resets the game
    */
   const handleStatisticsReset = () => {
-    setOpenConfirmationModal(false);
     gameLogManager.resetGameLog();
     resetGameState();
   };
 
-  /**
-   * Generic Function to generate a Confirmation dialog
-   * @param onConfirm
-   * @param onCancel
-   * @param dialogText
-   * @returns
-   */
-  const generateConfirmationDialogContents = (onConfirm: () => void, onCancel: () => void, dialogText: string) => {
-    return (
-      <Modal open={openConfirmationModal} setOpen={setOpenConfirmationModal} title="Confirm">
-        <ConfirmationDialog onConfirm={onConfirm} onCancel={onCancel} confirmText="Reset">
-          {dialogText}
-        </ConfirmationDialog>
-      </Modal>
-    );
+  /** */
+  const handleDifficultyChange = (difficulty: DifficultyOptions) => {
+    localStorage.setItem(DIFFICULTY_KEY, difficulty);
+    setDifficulty(difficulty);
+    resetGameState();
   };
 
   return (
@@ -486,7 +490,7 @@ function App() {
           <ul className="list-disc list-inside">
             <li>The hidden word is 5 letters.</li>
             <li>Select or type letters to spell a word.</li>
-            <li>Use "Guess Word" to see if you are correct.</li>
+            <li>Use "Enter" to see if you are correct.</li>
             <li>
               Use <BackspaceIcon className="h-6 w-6 inline-block" /> to remove letters from your guess.
             </li>
@@ -513,22 +517,29 @@ function App() {
       <Modal open={openStatsModal} setOpen={setOpenStatsModal} title="Word Guess Statistics">
         <StatBlock gameLog={gameLogManager.gameLog} />
         <div className="w-full text-center mt-4">
-          <button className="underline pointer-cursor" onClick={() => setOpenConfirmationModal(true)}>
-            Reset Statistics
-          </button>
-          {generateConfirmationDialogContents(handleStatisticsReset, () => setOpenConfirmationModal(false), "Are you sure you want to reset your statistics?")}
+          <ConfirmationModalContextProvider confirmText="Are you sure you want to reset your statistics?" confirmButtonText="Reset">
+            <ButtonWithConfirmation className="underline pointer-cursor" onClick={handleStatisticsReset}>
+              Reset Statistics
+            </ButtonWithConfirmation>
+          </ConfirmationModalContextProvider>
         </div>
       </Modal>
-      {(showSuccess || showFail) && (
-        <Modal open={openShareModal} setOpen={setOpenShareModal} title={showSuccess ? `Success! The word is ${solution}` : `Sorry! The word was ${solution}`}>
-          <div className="flex flex-col justify-center mb-4">
-            <pre className="bg-slate-200 dark:bg-slate-800 px-4 py-2 rounded-md">{utilities.generateShareText(guessMap, puzzleNumber, showFail)}</pre>
-          </div>
-          <StatBlock gameLog={gameLogManager.gameLog} />
-        </Modal>
-      )}
+      <Modal open={(showSuccess || showFail) && openShareModal} setOpen={setOpenShareModal} title={showSuccess ? `Success! The word is ${solution}` : `Sorry! The word was ${solution}`}>
+        <div className="flex flex-col justify-center mb-4">
+          <pre className="bg-slate-200 dark:bg-slate-800 px-4 py-2 rounded-md">{utilities.generateShareText(guessMap, puzzleNumber, showFail)}</pre>
+        </div>
+        <StatBlock gameLog={gameLogManager.gameLog} />
+      </Modal>
       <Modal open={openSettingsModal} setOpen={setOpenSettingsModal} title="Settings">
         <dl>
+          <div className="grid-row">
+            <dt className="grid-label">Difficulty</dt>
+            <dd className="grid-field">
+              <ConfirmationModalContextProvider confirmText="Changing difficulty requires the current game to be reset. Are you sure you want to reset the game?" confirmButtonText="Reset">
+                <RadioWithConfirmation keys={Object.values(DifficultyOptions)} selectedValue={difficulty} onChange={handleDifficultyChange}></RadioWithConfirmation>
+              </ConfirmationModalContextProvider>
+            </dd>
+          </div>
           <div className="grid-row">
             <dt className="grid-label">Theme</dt>
             <dd className="grid-field">
@@ -564,6 +575,11 @@ function App() {
             </dd>
           </div>
         </dl>
+        <ConfirmationModalContextProvider confirmText="Are you sure you want to reset your statistics?" confirmButtonText="Reset">
+          <ButtonWithConfirmation className="underline pointer-cursor" onClick={handleStatisticsReset}>
+            Reset Statistics
+          </ButtonWithConfirmation>
+        </ConfirmationModalContextProvider>
       </Modal>
     </div>
   );
