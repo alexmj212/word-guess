@@ -42,7 +42,7 @@ const Keyboard: React.FC<KeyboardType> = ({ letterOptions, qwerty, onSelect, dis
         </div>
         <div className="flex flex-row justify-center">
           {" "}
-          <button title="Backspace" className="button-action bg-red-400 dark:bg-red-700" onClick={onBackspace} disabled={disableBackspace}>
+          <button title="Backspace" className="keyboard-action bg-red-400 dark:bg-red-700" onClick={onBackspace} disabled={disableBackspace}>
             <BackspaceIcon className="h-10 w-10" />
           </button>
           {letterOptions.slice(19, letterOptions.length).map((letter) => (
@@ -52,7 +52,7 @@ const Keyboard: React.FC<KeyboardType> = ({ letterOptions, qwerty, onSelect, dis
               </button>
             </React.Fragment>
           ))}
-          <button title="Guess Word" className={`button-action`} onClick={onSubmit} disabled={disableSubmit}>
+          <button title="Guess Word" className={`keyboard-action bg-green-400 dark:bg-green-700`} onClick={onSubmit} disabled={disableSubmit}>
             Enter
           </button>
         </div>
