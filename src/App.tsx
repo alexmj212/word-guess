@@ -456,15 +456,16 @@ function App() {
                 </ul>
               )}
             </div>
-            <Keyboard qwerty={keyboardDisplay === KeyboardState.QWERTY} letterOptions={letterOptions} onSelect={onSelect} disableCondition={(letter) => letter.disabled || showSuccess || showFail} />
-            <div className="flex flex-row flex-wrap justify-center">
-              <button title="Backspace" className="button bg-red-400 dark:bg-red-700" onClick={onBackspace} disabled={showSuccess || showFail || disableBackspace}>
-                <BackspaceIcon className="h-10 w-10" />
-              </button>
-              <button title="Guess Word" className={`button-action`} onClick={onSubmit} disabled={disableSubmit}>
-                Guess Word
-              </button>
-            </div>
+            <Keyboard
+              qwerty={keyboardDisplay === KeyboardState.QWERTY}
+              letterOptions={letterOptions}
+              onSelect={onSelect}
+              disableSelect={(letter) => letter.disabled || showSuccess || showFail}
+              onSubmit={onSubmit}
+              disableSubmit={disableSubmit}
+              onBackspace={onBackspace}
+              disableBackspace={showSuccess || showFail || disableBackspace}
+            ></Keyboard>
           </div>
         </div>
         <div className="border-t-2 mt-4 py-4 flex flex-row justify-between">
