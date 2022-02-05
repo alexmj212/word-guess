@@ -6,6 +6,11 @@ export enum DifficultyOptions {
   HARD = "hard",
 }
 
+export const difficultyDescriptions: { [key in DifficultyOptions]: string } = {
+  [DifficultyOptions.NORMAL]: "Standard Wordle Rules",
+  [DifficultyOptions.HARD]: "You can't reuse letters that aren't in the solution.",
+};
+
 export type GameState = {
   guessMap: LetterState[][];
   letterOptions: LetterState[];
