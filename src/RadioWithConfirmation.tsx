@@ -4,10 +4,11 @@ import { useConfirmationModalContext } from "./ConfirmationDialogContext";
 type RadioWithConfirmationType = {
   keys: string[];
   selectedValue: string;
+  keyDescription?: { [key: string]: string };
   onChange: Function;
 };
 
-export const RadioWithConfirmation = ({keys, selectedValue, onChange}: RadioWithConfirmationType) => {
+export const RadioWithConfirmation = ({ keys, selectedValue, keyDescription, onChange }: RadioWithConfirmationType) => {
   const modalContext = useConfirmationModalContext();
 
   const handleOnClick = async (value: string) => {
@@ -17,12 +18,15 @@ export const RadioWithConfirmation = ({keys, selectedValue, onChange}: RadioWith
 
   return (
     <RadioGroup value={selectedValue} onChange={(value) => handleOnClick(value)}>
-      {keys.map((difficultyOption) => (
-        <RadioGroup.Option key={difficultyOption} value={difficultyOption}>
+      {keys.map((option) => (
+        <RadioGroup.Option key={option} value={option}>
           {({ checked }) => (
             <div className="check-group">
               <div className={`check-radio ${checked ? "bg-blue-400" : "bg-white"}`}></div>
-              <span className="check-label">{difficultyOption}</span>
+              <div className="check-label">
+                <span className="check-label-name">{option}</span>
+                {keyDescription && <span className="check-label-description">{keyDescription[option]}</span>}
+              </div>
             </div>
           )}
         </RadioGroup.Option>
