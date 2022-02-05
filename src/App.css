@@ -67,16 +67,26 @@ body {
 }
 
 .check-group {
-  @apply flex flex-row mb-2 rounded align-middle items-center cursor-pointer;
+  @apply flex flex-row mb-2 rounded items-start cursor-pointer;
 }
 
 .check-radio {
-  @apply w-4 h-4 rounded-full mr-2 p-2 border-[2px];
+  @apply w-4 h-4 rounded-full mt-[3px] mr-2 p-2 border-[2px];
   @apply transition;
 }
 
 .check-label {
-  text-transform: capitalize;
+  @apply capitalize;
+  @apply flex flex-col;
+}
+
+.check-label-name {
+  @apply capitalize;
+}
+
+.check-label-description {
+  @apply normal-case;
+  @apply font-thin;
 }
 
 .no-match {
