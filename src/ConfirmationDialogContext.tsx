@@ -41,7 +41,7 @@ const ConfirmationModalContextProvider = ({ children, confirmText, confirmButton
       <Modal open={showConfirmationModal} setOpen={setShowConfirmationModal} title="Confirm">
         <div className="flex flex-col justify-center items-center">
           <div className="my-4">{confirmText}</div>
-          <div className="flex flex-row flex-1 justify-center">
+          <div className="flex flex-row flex-1 justify-center space-x-4">
             <button className="button py-2" onClick={handleCancel}>
               Cancel
             </button>
