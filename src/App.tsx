@@ -203,7 +203,9 @@ function App() {
    * @param letter
    */
   const onSelect = (letter: string) => {
-    if (!(showFail || showSuccess) && guessMap[mapPointer[0]].some((e) => e.letter === "") && !letterOptions.find(l => l.letter === letter)?.disabled) {
+    const isLetterDisabled = difficulty === DifficultyOptions.HARDER && letterOptions.find(l => l.letter === letter)?.disabled;
+    const spaceIsBlank = guessMap[mapPointer[0]].some((e) => e.letter === "");
+    if (!(showFail || showSuccess) && spaceIsBlank && !isLetterDisabled) {
       guessMap[mapPointer[0]][mapPointer[1]] = {
         ...DefaultLetter,
         letter: letter,
@@ -229,10 +231,17 @@ function App() {
   const onSubmit = () => {
     if (!disableSubmit) {
       const guessedWord = guessMap[mapPointer[0]].map((letter) => letter.letter).join("");
-      // Ensure the word is contained within all the possible words
-      if (guessWords.includes(guessedWord.toLocaleLowerCase()) || validWords.includes(guessedWord.toLocaleLowerCase())) {
+      const hintedLetters = letterOptions.filter(letter => letter.containMatch || letter.positionMatch);
+      const guessContainsAllHints = hintedLetters.every(letter=> guessedWord.includes(letter.letter));
+      if ((difficulty === DifficultyOptions.HARD || difficulty === DifficultyOptions.HARDER) && !guessContainsAllHints) {
+        // In harder difficulty, make sure the guess contains all hints
+        setShowError(true);
+        setErrorMessage(`Must include all previous hints!`);
+      } else if (guessWords.includes(guessedWord.toLocaleLowerCase()) || validWords.includes(guessedWord.toLocaleLowerCase())) {
+        // Ensure the word is contained within all the possible words
         validateWord(guessedWord);
       } else {
+        // Not a valid word
         gameLogManager.updateInvalidWordCount();
         setShowError(true);
         setErrorMessage(`${guessedWord} is not a word!`);
@@ -287,7 +296,7 @@ function App() {
         // Update keyboard state
         keyboardLetter.noMatch = true;
         // Add difficulty
-        if (difficulty === DifficultyOptions.HARD) {
+        if (difficulty === DifficultyOptions.HARDER) {
           keyboardLetter.disabled = true;
         }
       }
@@ -436,7 +445,7 @@ function App() {
           </div>
           <div className="flex flex-row flex-wrap mb-4 justify-center space-x-4">
             <span>
-              <strong>Diffculty Mode:</strong>{" "}
+              <strong>Difficulty Mode:</strong>{" "}
               <button className="underline capitalize" onClick={() => setOpenSettingsModal(true)}>
                 {difficulty}
               </button>

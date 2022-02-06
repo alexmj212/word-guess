@@ -4,11 +4,13 @@ import { alphabet } from "./wordList";
 export enum DifficultyOptions {
   NORMAL = "normal",
   HARD = "hard",
+  HARDER = "harder"
 }
 
 export const difficultyDescriptions: { [key in DifficultyOptions]: string } = {
   [DifficultyOptions.NORMAL]: "Standard Wordle Rules",
-  [DifficultyOptions.HARD]: "You can't reuse letters that aren't in the solution.",
+  [DifficultyOptions.HARD]: "Any revealed hints must be used in subsequent guesses.",
+  [DifficultyOptions.HARDER]: "Any revealed hints must be used in subsequent guesses. You can't reuse letters that aren't in the solution.",
 };
 
 export type GameState = {
