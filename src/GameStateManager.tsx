@@ -4,7 +4,7 @@ import { alphabet } from "./wordList";
 export enum DifficultyOptions {
   NORMAL = "normal",
   HARD = "hard",
-  HARDER = "harder"
+  HARDER = "very hard"
 }
 
 export const difficultyDescriptions: { [key in DifficultyOptions]: string } = {
