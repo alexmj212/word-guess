@@ -531,7 +531,7 @@ function App() {
             </a>
           </div>
           <div className="flex flex-row space-x-4 justify-start items-end">
-            <span>Build: {process.env.REACT_APP_VERSION}</span>
+            <span>Build: {document.querySelector('meta[name="build-version"]')?.getAttribute("build-version")}</span>
             <a href="https://www.github.com/alexmj212/word-guess" className="underline">
               Source
             </a>
