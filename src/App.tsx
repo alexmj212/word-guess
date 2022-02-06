@@ -435,21 +435,26 @@ function App() {
         </div>
         <div className="flex flex-auto flex-col justify-center my-2 mx-auto">
           <div className="flex flex-initial flex-row flex-wrap mb-2 justify-center space-x-4">
-            <button className="underline" onClick={() => resetGameState()}>
-              Get a New Puzzle
-            </button>
-            <button
-              className="underline"
-              onClick={() => {
-                if (!showFail) {
-                  gameLogManager.updateForfeitCount();
-                  clearError();
-                  setShowFail(true);
-                }
-              }}
-            >
-              Forfeit Puzzle
-            </button>
+            <ConfirmationModalContextProvider confirmText="Are you sure you want a new puzzle?" confirmButtonText="New Puzzle">
+              <ButtonWithConfirmation className="underline pointer-cursor" onClick={() => resetGameState()}>
+                New Puzzle
+              </ButtonWithConfirmation>
+            </ConfirmationModalContextProvider>
+            <ConfirmationModalContextProvider confirmText="Are you sure you want to reveal the solution?" confirmButtonText="Reveal">
+              <ButtonWithConfirmation
+                disabled={showSuccess || showFail}
+                className="underline pointer-cursor disabled:opacity-30 hover:disabled:border-slate-400"
+                onClick={() => {
+                  if (!showFail) {
+                    gameLogManager.updateForfeitCount();
+                    clearError();
+                    setShowFail(true);
+                  }
+                }}
+              >
+                Reveal Solution
+              </ButtonWithConfirmation>
+            </ConfirmationModalContextProvider>
           </div>
           <div className="flex flex-initial flex-row flex-wrap mb-4 justify-center space-x-4">
             <span>
@@ -501,12 +506,15 @@ function App() {
           </div>
         </div>
         <div className="flex flex-initial flex-row justify-between border-t-2 border-slate-300 dark:border-slate-500 mt-4 py-4 text-xs">
-          <div>
+          <div className="flex flex-row space-x-4">
             <a href="https://alexmj212.dev" className="underline">
               alexmj212.dev
             </a>
+            <a href="https://alexmj212.dev/blog/understanding-how-wordle-works/" className="underline">
+              How Word Guess Works
+            </a>
           </div>
-          <div className="flex flex-row space-x-2 justify-start items-end">
+          <div className="flex flex-row space-x-4 justify-start items-end">
             <span>Build: {process.env.REACT_APP_VERSION}</span>
             <a href="https://www.github.com/alexmj212/word-guess" className="underline">
               Source
