@@ -2,6 +2,28 @@
 @tailwind components;
 @tailwind utilities;
 
+/* DEFAULT = "bg-slate-300 dark:bg-slate-800",
+ERROR = "bg-red-400 dark:bg-red-700",
+WARN = "bg-yellow-400 dark:bg-yellow-700",
+SUCCESS = "bg-green-400 dark:bg-green-700" */
+
+:root {
+  --toastify-color-warning: theme('colors.yellow.400');
+  --toastify-color-error: theme('colors.red.400');
+  --toastify-color-success: theme('colors.green.400');
+  --toastify-text-color-warning: theme('colors.black');
+  --toastify-text-color-error: theme('colors.black');
+  --toastify-text-color-success: theme('colors.black');
+}
+:root[class=dark] {
+  --toastify-color-warning: theme('colors.yellow.700');
+  --toastify-color-error: theme('colors.red.700');
+  --toastify-color-success: theme('colors.green.700');
+  --toastify-text-color-warning: theme('colors.white');
+  --toastify-text-color-error: theme('colors.white');
+  --toastify-text-color-success: theme('colors.white');
+}
+
 html {
   @apply h-full;
 }
@@ -33,6 +55,12 @@ body {
   @apply button-base;
   @apply m-[2px] px-1;
   @apply md:px-4;
+}
+
+.button-outline {
+  @apply button;
+  @apply py-1;
+  @apply border-slate-300 dark:border-slate-500;
 }
 
 .button-positive {
@@ -101,7 +129,7 @@ body {
 
 .check-label-description {
   @apply normal-case;
-  @apply text-sm font-thin;
+  @apply text-sm font-light;
 }
 
 .no-match {
@@ -119,7 +147,7 @@ body {
 .grid-row {
   @apply grid grid-cols-12 gap-4 auto-cols-min;
   @apply pb-1 mb-1;
-  @apply border-b-2 border-gray-200 dark:border-gray-500;
+  @apply border-b-2 border-slate-200 dark:border-slate-500;
   @apply last:border-0;
 }
 
