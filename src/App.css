@@ -65,17 +65,16 @@ body {
   @apply letter-option;
 }
 
-.cursor {
-  @apply border-2 border-slate-900 dark:border-slate-100;
-  @apply animate-pulse;
-  @apply w-12 h-12;
-  @apply md:w-14 md:h-14;
-}
-
 .guess-box {
   @apply border-2 border-slate-300 dark:border-slate-500;
-  @apply w-12 h-12;
-  @apply md:w-14 md:h-14;
+  @apply text-2xl md:text-4xl;
+  @apply w-14 h-14;
+  @apply md:w-16 md:h-16;
+}
+
+.cursor {
+  @apply guess-box;
+  @apply animate-pulse;
 }
 
 .flex-break {
