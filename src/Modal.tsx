@@ -1,4 +1,4 @@
-import React, { Fragment, ReactFragment, useRef } from "react";
+import React, { Fragment, useRef } from "react";
 import { Dialog, Transition } from "@headlessui/react";
 import { XIcon } from "@heroicons/react/outline";
 
@@ -7,10 +7,9 @@ type ModalProps = {
   open: boolean;
   setOpen: (state: boolean) => void;
   isStatic?: boolean;
-  confirmationDialog?: ReactFragment;
 };
 
-const Modal: React.FC<ModalProps> = ({ title, open, setOpen, isStatic = false, confirmationDialog, children }) => {
+const Modal: React.FC<ModalProps> = ({ title, open, setOpen, isStatic = false, children }) => {
   const closeRef = useRef(null);
 
   return (
@@ -47,7 +46,6 @@ const Modal: React.FC<ModalProps> = ({ title, open, setOpen, isStatic = false, c
                       </button>
                     </div>
                     <div className="mt-2">{children}</div>
-                    {confirmationDialog}
                   </div>
                 </div>
               </div>
