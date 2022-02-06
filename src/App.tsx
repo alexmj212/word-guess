@@ -406,10 +406,10 @@ function App() {
 
   return (
     <div className="w-full h-full">
-      <div className="w-full max-w-4xl mx-auto my-2 px-2 sm:my-4 sm:px-4">
-        <div className="flex flex-row flex-wrap justify-between items-end border-b-2 pb-4 space-y-2">
+      <div className="flex flex-col w-full h-full max-w-4xl mx-auto py-2 px-2 sm:px-4">
+        <div className="flex flex-initial flex-row flex-wrap justify-between items-end border-b-2 border-slate-300 dark:border-slate-500 pb-4 space-y-2">
           <h1 className="text-lg md:text-4xl font-bold flex flex-row items-center">
-            <img src={logo} alt="Word Guess" title="Word Guess" className="w-6 h-6 sm:w-8 sm:h-8 mx-2 sm:mt-1"/>
+            <img src={logo} alt="Word Guess" title="Word Guess" className="w-6 h-6 sm:w-8 sm:h-8 mx-2 sm:ml-0 sm:mt-1" />
             Word Guess #{puzzleNumber}
           </h1>
           <ul className="list-none flex flex-row space-x-4">
@@ -430,8 +430,8 @@ function App() {
             </li>
           </ul>
         </div>
-        <div className="my-4 mx-auto flex flex-col justify-center">
-          <div className="flex flex-row flex-wrap mb-2 justify-center space-x-4">
+        <div className="flex flex-auto flex-col justify-center my-2 mx-auto">
+          <div className="flex flex-initial flex-row flex-wrap mb-2 justify-center space-x-4">
             <button className="underline" onClick={() => resetGameState()}>
               Get a New Puzzle
             </button>
@@ -448,7 +448,7 @@ function App() {
               Forfeit Puzzle
             </button>
           </div>
-          <div className="flex flex-row flex-wrap mb-4 justify-center space-x-4">
+          <div className="flex flex-initial flex-row flex-wrap mb-4 justify-center space-x-4">
             <span>
               <strong>Difficulty Mode:</strong>{" "}
               <button className="underline capitalize" onClick={() => setOpenSettingsModal(true)}>
@@ -456,8 +456,11 @@ function App() {
               </button>
             </span>
           </div>
-          <GuessDisplay guessMap={guessMap} mapPointer={mapPointer} />
-          <div className="flex flex-col">
+          <div className="flex flex-auto justify-center items-center">
+            <GuessDisplay guessMap={guessMap} mapPointer={mapPointer} />
+          </div>
+
+          <div className="flex flex-initial flex-col">
             <div className="flex flex-col justify-center items-center h-20">
               {showError && <Toast type={ToastTypes.WARN} message={errorMessage} />}
               {showFail && <Toast type={ToastTypes.ERROR} message={`Sorry! The word was ${solution}`} />}
@@ -494,13 +497,14 @@ function App() {
             ></Keyboard>
           </div>
         </div>
-        <div className="border-t-2 mt-4 py-4 flex flex-row justify-between">
+        <div className="flex flex-initial flex-row justify-between border-t-2 border-slate-300 dark:border-slate-500 mt-4 py-4 text-xs">
           <div>
             <a href="https://alexmj212.dev" className="underline">
               alexmj212.dev
             </a>
           </div>
-          <div>
+          <div className="flex flex-row space-x-2 justify-start items-end">
+            <span>Build: {process.env.REACT_APP_VERSION}</span>
             <a href="https://www.github.com/alexmj212/word-guess" className="underline">
               Source
             </a>

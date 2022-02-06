@@ -2,9 +2,18 @@
 @tailwind components;
 @tailwind utilities;
 
+html {
+  @apply h-full;
+}
+
 body {
+  @apply h-full;
   @apply bg-gray-100;
   @apply dark:text-white dark:bg-gray-900;
+}
+
+#root {
+  @apply h-full;
 }
 
 .button-base {
@@ -69,8 +78,6 @@ body {
   @apply md:w-14 md:h-14;
 }
 
-
-
 .flex-break {
   @apply basis-full h-0;
 }
@@ -111,18 +118,18 @@ body {
 }
 
 .grid-row {
-  @apply grid grid-cols-6 gap-4 auto-cols-min;
+  @apply grid grid-cols-12 gap-4 auto-cols-min;
   @apply pb-1 mb-1;
   @apply border-b-2 border-gray-200 dark:border-gray-500;
   @apply last:border-0;
 }
 
 .grid-label {
-  @apply col-span-2 font-bold text-right;
+  @apply col-span-5 font-bold text-right;
 }
 
 .grid-field {
-  @apply col-span-4 font-semibold;
+  @apply col-span-7 font-semibold;
 }
 
 
