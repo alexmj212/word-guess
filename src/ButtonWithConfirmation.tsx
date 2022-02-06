@@ -3,11 +3,12 @@ import { useConfirmationModalContext } from "./ConfirmationDialogContext";
 
 type ButtonWithConfirmationType = {
   onClick: Function;
+  disabled?: boolean;
   className: string;
   children?: React.ReactNode;
 };
 
-export const ButtonWithConfirmation = ({ children, className, onClick }: ButtonWithConfirmationType) => {
+export const ButtonWithConfirmation = ({ children, className, onClick, disabled }: ButtonWithConfirmationType) => {
   const modalContext = useConfirmationModalContext();
 
   const handleOnClick = async () => {
@@ -16,7 +17,7 @@ export const ButtonWithConfirmation = ({ children, className, onClick }: ButtonW
   };
 
   return (
-    <button className={className} onClick={handleOnClick}>
+    <button className={className} onClick={handleOnClick} disabled={disabled}>
       {children}
     </button>
   );
