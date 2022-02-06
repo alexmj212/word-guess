@@ -1,17 +1,19 @@
 import React, { useEffect, useState } from "react";
-import "./App.css";
-import Modal from "./Modal";
-import { alphabet, guessWords, validWords } from "./wordList";
+
 import { BackspaceIcon, BookOpenIcon, ChartBarIcon, CogIcon } from "@heroicons/react/outline";
+import { RadioGroup } from "@headlessui/react";
 import { useHotkeys } from "react-hotkeys-hook";
 
+import "./App.css";
+import logo from "./word-guess-logo.png";
+import Modal from "./Modal";
+import { alphabet, guessWords, validWords } from "./wordList";
 import Toast, { ToastTypes } from "./Toast";
 import utilities from "./util";
 import GuessDisplay from "./GuessDisplay";
 import Keyboard from "./Keyboard";
 import { GameLogManager } from "./GameLogManager";
 import StatBlock from "./StatBlock";
-import { RadioGroup } from "@headlessui/react";
 import { DefaultLetter, difficultyDescriptions, DifficultyOptions, GameState, GameStateManager } from "./GameStateManager";
 import ConfirmationModalContextProvider from "./ConfirmationDialogContext";
 import { ButtonWithConfirmation } from "./ButtonWithConfirmation";
@@ -203,7 +205,7 @@ function App() {
    * @param letter
    */
   const onSelect = (letter: string) => {
-    const isLetterDisabled = difficulty === DifficultyOptions.HARDER && letterOptions.find(l => l.letter === letter)?.disabled;
+    const isLetterDisabled = difficulty === DifficultyOptions.HARDER && letterOptions.find((l) => l.letter === letter)?.disabled;
     const spaceIsBlank = guessMap[mapPointer[0]].some((e) => e.letter === "");
     if (!(showFail || showSuccess) && spaceIsBlank && !isLetterDisabled) {
       guessMap[mapPointer[0]][mapPointer[1]] = {
@@ -231,8 +233,8 @@ function App() {
   const onSubmit = () => {
     if (!disableSubmit) {
       const guessedWord = guessMap[mapPointer[0]].map((letter) => letter.letter).join("");
-      const hintedLetters = letterOptions.filter(letter => letter.containMatch || letter.positionMatch);
-      const guessContainsAllHints = hintedLetters.every(letter=> guessedWord.includes(letter.letter));
+      const hintedLetters = letterOptions.filter((letter) => letter.containMatch || letter.positionMatch);
+      const guessContainsAllHints = hintedLetters.every((letter) => guessedWord.includes(letter.letter));
       if ((difficulty === DifficultyOptions.HARD || difficulty === DifficultyOptions.HARDER) && !guessContainsAllHints) {
         // In harder difficulty, make sure the guess contains all hints
         setShowError(true);
@@ -405,8 +407,11 @@ function App() {
   return (
     <div className="w-full h-full">
       <div className="w-full max-w-4xl mx-auto my-2 px-2 sm:my-4 sm:px-4">
-        <div className="flex flex-row justify-between items-end border-b-2 pb-4">
-          <h1 className="text-lg md:text-4xl font-bold">Word Guess #{puzzleNumber}</h1>
+        <div className="flex flex-row flex-wrap justify-between items-end border-b-2 pb-4 space-y-2">
+          <h1 className="text-lg md:text-4xl font-bold flex flex-row items-center">
+            <img src={logo} alt="Word Guess" title="Word Guess" className="w-6 h-6 sm:w-8 sm:h-8 mx-2 sm:mt-1"/>
+            Word Guess #{puzzleNumber}
+          </h1>
           <ul className="list-none flex flex-row space-x-4">
             <li>
               <button title="Stats" onClick={() => setOpenStatsModal(true)}>
