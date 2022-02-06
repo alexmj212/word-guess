@@ -207,7 +207,10 @@ function App() {
   const onSelect = (letter: string) => {
     const isLetterDisabled = difficulty === DifficultyOptions.HARDER && letterOptions.find((l) => l.letter === letter)?.disabled;
     const spaceIsBlank = guessMap[mapPointer[0]].some((e) => e.letter === "");
-    if (!(showFail || showSuccess) && spaceIsBlank && !isLetterDisabled) {
+    if (isLetterDisabled) {
+      setShowError(true);
+      setErrorMessage(`${letter} is disabled!`);
+    } else if (!(showFail || showSuccess) && spaceIsBlank && !isLetterDisabled) {
       guessMap[mapPointer[0]][mapPointer[1]] = {
         ...DefaultLetter,
         letter: letter,
