@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import { BackspaceIcon, BookOpenIcon, ChartBarIcon, CogIcon } from "@heroicons/react/outline";
 import { RadioGroup } from "@headlessui/react";
 import { useHotkeys } from "react-hotkeys-hook";
-
+import "react-toastify/dist/ReactToastify.min.css";
 import "./App.css";
 import logo from "./word-guess-logo.png";
 import Modal from "./Modal";
@@ -18,6 +18,7 @@ import { DefaultLetter, difficultyDescriptions, DifficultyOptions, GameState, Ga
 import ConfirmationModalContextProvider from "./ConfirmationDialogContext";
 import { ButtonWithConfirmation } from "./ButtonWithConfirmation";
 import { RadioWithConfirmation } from "./RadioWithConfirmation";
+import { Slide, toast, ToastContainer } from "react-toastify";
 
 export type LetterState = {
   letter: string;
@@ -216,6 +217,7 @@ function App() {
         letter: letter,
       };
       setMapPointer([mapPointer[0], mapPointer[1] + 1]);
+      clearError();
     }
   };
 
@@ -240,16 +242,14 @@ function App() {
       const guessContainsAllHints = hintedLetters.every((letter) => guessedWord.includes(letter.letter));
       if ((difficulty === DifficultyOptions.HARD || difficulty === DifficultyOptions.HARDER) && !guessContainsAllHints) {
         // In harder difficulty, make sure the guess contains all hints
-        setShowError(true);
-        setErrorMessage(`Must include all previous hints!`);
+        toast.warn(`Must include all previous hints!`);
       } else if (guessWords.includes(guessedWord.toLocaleLowerCase()) || validWords.includes(guessedWord.toLocaleLowerCase())) {
         // Ensure the word is contained within all the possible words
         validateWord(guessedWord);
       } else {
         // Not a valid word
         gameLogManager.updateInvalidWordCount();
-        setShowError(true);
-        setErrorMessage(`${guessedWord} is not a word!`);
+        toast.warn(`${guessedWord} is not a word!`);
       }
     }
   };
@@ -263,8 +263,7 @@ function App() {
   const validateWord = (guess: string) => {
     // Check if word has already been tried
     if (utilities.previousGuess(guess, guessMap, mapPointer)) {
-      setShowError(true);
-      setErrorMessage(`You already tried ${guess}.`);
+      toast.warn(`You already tried ${guess}.`);
       return;
     }
 
@@ -329,18 +328,21 @@ function App() {
     if (guess === solution) {
       gameLogManager.updateWinCount(guess, mapPointer[0] + 1);
       setShowSuccess(true);
+      clearError();
       return;
     }
 
     // No success, next line
     if (mapPointer[0] < guessMap.length) {
       setMapPointer([mapPointer[0] + 1, 0]);
+      clearError();
     }
 
     // Out of guesses
     if (mapPointer[0] === guessMap.length - 1) {
       gameLogManager.updateLossCount();
       setShowFail(true);
+      clearError();
       return;
     }
 
@@ -357,6 +359,7 @@ function App() {
   const clearError = () => {
     setErrorMessage("");
     setShowError(false);
+    toast.clearWaitingQueue();
   };
 
   // Handle keyboard input
@@ -433,47 +436,45 @@ function App() {
             </li>
           </ul>
         </div>
-        <div className="flex flex-auto flex-col justify-center my-2 mx-auto">
-          <div className="flex flex-initial flex-row flex-wrap mb-2 justify-center space-x-4">
-            <ConfirmationModalContextProvider confirmText="Are you sure you want a new puzzle?" confirmButtonText="New Puzzle">
-              <ButtonWithConfirmation className="underline pointer-cursor" onClick={() => resetGameState()}>
-                New Puzzle
-              </ButtonWithConfirmation>
-            </ConfirmationModalContextProvider>
-            <ConfirmationModalContextProvider confirmText="Are you sure you want to reveal the solution?" confirmButtonText="Reveal">
-              <ButtonWithConfirmation
-                disabled={showSuccess || showFail}
-                className="underline pointer-cursor disabled:opacity-30 hover:disabled:border-slate-400"
-                onClick={() => {
-                  if (!showFail) {
-                    gameLogManager.updateForfeitCount();
-                    clearError();
-                    setShowFail(true);
-                  }
-                }}
-              >
-                Reveal Solution
-              </ButtonWithConfirmation>
-            </ConfirmationModalContextProvider>
-          </div>
-          <div className="flex flex-initial flex-row flex-wrap mb-4 justify-center space-x-4">
-            <span>
-              <strong>Difficulty Mode:</strong>{" "}
-              <button className="underline capitalize" onClick={() => setOpenSettingsModal(true)}>
+        <div className="flex flex-auto flex-col justify-center my-2">
+          <div className="flex flex-initial flex-row flex-wrap justify-between">
+            <div className="flex flex-auto flex-row flex-wrap space-x-4 justify-center md:justify-start">
+              <ConfirmationModalContextProvider confirmText="Are you sure you want a new puzzle?" confirmButtonText="New Puzzle">
+                <ButtonWithConfirmation className="button-outline" onClick={() => resetGameState()}>
+                  New Puzzle
+                </ButtonWithConfirmation>
+              </ConfirmationModalContextProvider>
+              <ConfirmationModalContextProvider confirmText="Are you sure you want to reveal the solution?" confirmButtonText="Reveal">
+                <ButtonWithConfirmation
+                  disabled={showSuccess || showFail}
+                  className="button-outline"
+                  onClick={() => {
+                    if (!showFail) {
+                      gameLogManager.updateForfeitCount();
+                      clearError();
+                      setShowFail(true);
+                    }
+                  }}
+                >
+                  Reveal Solution
+                </ButtonWithConfirmation>
+              </ConfirmationModalContextProvider>
+            </div>
+            <div className="hidden md:flex flex-initial flex-row flex-wrap justify-center items-center space-x-2">
+              <strong>Difficulty:</strong>{" "}
+              <button className="button-outline capitalize" onClick={() => setOpenSettingsModal(true)}>
                 {difficulty}
               </button>
-            </span>
+            </div>
           </div>
           <div className="flex flex-auto justify-center items-center">
             <GuessDisplay guessMap={guessMap} mapPointer={mapPointer} />
           </div>
-
           <div className="flex flex-initial flex-col">
-            <div className="flex flex-col justify-center items-center h-20">
-              {showError && <Toast type={ToastTypes.WARN} message={errorMessage} />}
-              {showFail && <Toast type={ToastTypes.ERROR} message={`Sorry! The word was ${solution}`} />}
-              {showSuccess && <Toast type={ToastTypes.SUCCESS} message={`Success! The word is ${solution}!`} />}
-              {(showFail || showSuccess) && (
+            {(showFail || showSuccess) && (
+              <div className="flex flex-col justify-center items-center">
+                {showFail && <Toast type={ToastTypes.ERROR} message={`Sorry! The word was ${solution}`} />}
+                {showSuccess && <Toast type={ToastTypes.SUCCESS} message={`Success! The word is ${solution}!`} />}
                 <ul className="list-none flex flex-row space-x-4">
                   <li>
                     <button className="underline" onClick={() => setOpenShareModal(true)}>
@@ -491,8 +492,23 @@ function App() {
                     </button>
                   </li>
                 </ul>
-              )}
-            </div>
+              </div>
+            )}
+            <ToastContainer 
+              position="top-center" 
+              transition={Slide} 
+              limit={1} 
+              autoClose={3000} 
+              hideProgressBar 
+              newestOnTop={false} 
+              closeOnClick 
+              rtl={false} 
+              pauseOnHover 
+              pauseOnFocusLoss 
+              draggable 
+              theme="colored"
+              closeButton={false}
+            ></ToastContainer>
             <Keyboard
               qwerty={keyboardDisplay === KeyboardState.QWERTY}
               letterOptions={letterOptions}
@@ -553,9 +569,9 @@ function App() {
       </Modal>
       <Modal open={openStatsModal} setOpen={setOpenStatsModal} title="Word Guess Statistics">
         <StatBlock gameLog={gameLogManager.gameLog} />
-        <div className="w-full text-center mt-4">
+        <div className="flex flex-auto flex-row justify-center mt-4">
           <ConfirmationModalContextProvider confirmText="Are you sure you want to reset your statistics?" confirmButtonText="Reset">
-            <ButtonWithConfirmation className="underline pointer-cursor" onClick={handleStatisticsReset}>
+            <ButtonWithConfirmation className="button-negative" onClick={handleStatisticsReset}>
               Reset Statistics
             </ButtonWithConfirmation>
           </ConfirmationModalContextProvider>
@@ -612,11 +628,6 @@ function App() {
             </dd>
           </div>
         </dl>
-        <ConfirmationModalContextProvider confirmText="Are you sure you want to reset your statistics?" confirmButtonText="Reset">
-          <ButtonWithConfirmation className="underline pointer-cursor" onClick={handleStatisticsReset}>
-            Reset Statistics
-          </ButtonWithConfirmation>
-        </ConfirmationModalContextProvider>
       </Modal>
     </div>
   );
