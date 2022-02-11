@@ -1,5 +1,5 @@
 import { BackspaceIcon } from "@heroicons/react/outline";
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import { LetterState } from "./App";
 import utilities from "./util";
 import { alphabet, qwertyKeyboard } from "./wordList";
@@ -16,11 +16,19 @@ type KeyboardType = {
 };
 
 const Keyboard: React.FC<KeyboardType> = ({ letterOptions, qwerty, onSelect, disableSelect, onSubmit, disableSubmit, onBackspace, disableBackspace }) => {
+  const enterRef = useRef<HTMLDivElement>(null);
+
   qwerty ? letterOptions.sort((a, b) => qwertyKeyboard.indexOf(a.letter) - qwertyKeyboard.indexOf(b.letter)) : letterOptions.sort((a, b) => alphabet.indexOf(a.letter) - alphabet.indexOf(b.letter));
+
+  useEffect(() => {
+    if (enterRef.current) {
+      enterRef.current.focus();
+    }
+  }, [enterRef, letterOptions]);
 
   return (
     <>
-      <div className="flex flex-col justify-center w-full mx-auto">
+      <div ref={enterRef} className="flex flex-col justify-center w-full mx-auto">
         <div className="flex flex-row justify-center">
           {letterOptions.slice(0, 10).map((letter) => (
             <React.Fragment key={letter.letter}>
