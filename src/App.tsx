@@ -245,7 +245,12 @@ function App() {
         toast.warn(`Must include all previous hints!`);
       } else if (guessWords.includes(guessedWord.toLocaleLowerCase()) || validWords.includes(guessedWord.toLocaleLowerCase())) {
         // Ensure the word is contained within all the possible words
-        validateWord(guessedWord);
+        if (utilities.previousGuess(guessedWord, guessMap, mapPointer)) {
+          // Check if word has already been tried
+          toast.warn(`You already tried ${guessedWord}.`);
+        } else {
+          validateWord(guessedWord);
+        }
       } else {
         // Not a valid word
         gameLogManager.updateInvalidWordCount();
@@ -261,12 +266,6 @@ function App() {
    * @returns
    */
   const validateWord = (guess: string) => {
-    // Check if word has already been tried
-    if (utilities.previousGuess(guess, guessMap, mapPointer)) {
-      toast.warn(`You already tried ${guess}.`);
-      return;
-    }
-
     gameLogManager.updateGuessCount();
 
     const guessMapRow = guessMap[mapPointer[0]];
@@ -494,21 +493,7 @@ function App() {
                 </ul>
               </div>
             )}
-            <ToastContainer 
-              position="top-center" 
-              transition={Slide} 
-              limit={1} 
-              autoClose={3000} 
-              hideProgressBar 
-              newestOnTop={false} 
-              closeOnClick 
-              rtl={false} 
-              pauseOnHover 
-              pauseOnFocusLoss 
-              draggable 
-              theme="colored"
-              closeButton={false}
-            ></ToastContainer>
+            <ToastContainer position="top-center" transition={Slide} limit={1} autoClose={3000} hideProgressBar newestOnTop={false} closeOnClick rtl={false} pauseOnHover pauseOnFocusLoss draggable theme="colored" closeButton={false}></ToastContainer>
             <Keyboard
               qwerty={keyboardDisplay === KeyboardState.QWERTY}
               letterOptions={letterOptions}
