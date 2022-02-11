@@ -17,7 +17,7 @@ const Modal: React.FC<ModalProps> = ({ title, open, setOpen, isStatic = false, c
       <Dialog as="div" className="fixed z-10 inset-0 overflow-y-auto" onClose={setOpen} initialFocus={closeRef} static={isStatic}>
         <div className="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
           <Transition.Child as={Fragment} enter="ease-out duration-300" enterFrom="opacity-0" enterTo="opacity-100" leave="ease-in duration-200" leaveFrom="opacity-100" leaveTo="opacity-0">
-            <Dialog.Overlay className="fixed inset-0 bg-neutral-800 bg-opacity-80 transition-opacity" />
+            <Dialog.Overlay className="fixed inset-0 bg-neutral-900 bg-opacity-80 transition-opacity" />
           </Transition.Child>
 
           {/* This element is to trick the browser into centering the modal contents. */}
