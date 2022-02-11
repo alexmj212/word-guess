@@ -40,7 +40,7 @@ body {
 
 .button-base {
   @apply flex justify-center items-center;
-  @apply text-xl rounded-md font-bold;
+  @apply rounded-md;
   @apply border-2 border-transparent;
   @apply hover:shadow-md;
   @apply hover:border-slate-500 dark:hover:border-slate-100;
@@ -50,6 +50,7 @@ body {
 
 .button {
   @apply button-base;
+  @apply text-xl rounded-md font-bold;
   @apply active:scale-95 active:shadow active:border-2 active:border-slate-300 dark:active:border-slate-500;
   @apply m-[2px] px-1;
   @apply md:px-4;
@@ -93,6 +94,7 @@ body {
 }
 
 .guess-box {
+  @apply rounded-md font-bold;
   @apply text-2xl md:text-4xl;
   @apply w-14 h-14;
   @apply md:w-16 md:h-16;
@@ -172,6 +174,7 @@ body {
 .flip-card-front,
 .flip-card-back {
   @apply button-base;
+  @apply rounded-md font-bold;
   @apply border-2 border-slate-300 dark:border-slate-500;
   @apply text-2xl md:text-4xl;
   @apply absolute w-full h-full;

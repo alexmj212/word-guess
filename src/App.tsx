@@ -51,6 +51,9 @@ function App() {
   const [solution, setSolution] = useState<string>(""); // the solution
   const [difficulty, setDifficulty] = useState<DifficultyOptions>(DifficultyOptions.NORMAL); // the game difficulty
 
+  const [todaysPuzzle, setTodaysPuzzle] = useState<number>(0);
+  const currentDate = new Date();
+
   // Control States
   const [disableSubmit, setDisableSubmit] = useState<boolean>(true);
   const [disableBackspace, setDisableBackspace] = useState<boolean>(true);
@@ -84,6 +87,10 @@ function App() {
     loadGameState(gameStateManager.gameState);
     determineKeyboard();
     determineDifficulty();
+    const startDate = new Date("2021-06-19");
+    const today = new Date();
+    setTodaysPuzzle(Math.round(Math.abs((today.valueOf() - startDate.valueOf()) / (24 * 60 * 60 * 1000))));
+
     // Show the rules on the first time
     setOpenRulesModal(gameLogManager.gameLog.gamesPlayed === 0 && gameLogManager.gameLog.guessCount === 0);
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
@@ -170,7 +177,7 @@ function App() {
    * Performs a hard reset of the game state
    * Depends on deep copy hack of the default game state
    */
-  const resetGameState = () => {
+  const resetGameState = (puzzleNumber?: number) => {
     gameStateManager.resetGameState();
     const defaultState: GameState = gameStateManager.generateNewGameState();
     setGuessMap(defaultState.guessMap);
@@ -180,7 +187,12 @@ function App() {
     setErrorMessage(defaultState.errorMessage);
     setShowFail(defaultState.showFail);
     setShowSuccess(defaultState.showSuccess);
-    generateNewPuzzle();
+    if (puzzleNumber) {
+      setSolution(validWords[puzzleNumber].toLocaleUpperCase());
+      setPuzzleNumber(puzzleNumber);
+    } else {
+      generateNewPuzzle();
+    }
   };
 
   const determineKeyboard = () => {
@@ -326,6 +338,7 @@ function App() {
     // Success
     if (guess === solution) {
       gameLogManager.updateWinCount(guess, mapPointer[0] + 1);
+      setMapPointer([mapPointer[0] + 1, 0]);
       setShowSuccess(true);
       clearError();
       return;
@@ -415,7 +428,7 @@ function App() {
         <div className="flex flex-initial flex-row flex-wrap justify-between items-end border-b-2 border-slate-300 dark:border-slate-500 pb-4 space-y-2">
           <h1 className="text-lg md:text-4xl font-bold flex flex-row items-center">
             <img src={logo} alt="Word Guess" title="Word Guess" className="w-6 h-6 sm:w-8 sm:h-8 mx-2 sm:ml-0 sm:mt-1" />
-            Word Guess #{puzzleNumber}
+            Word Guess
           </h1>
           <ul className="list-none flex flex-row space-x-4">
             <li>
@@ -438,26 +451,36 @@ function App() {
         <div className="flex flex-auto flex-col justify-center my-2">
           <div className="flex flex-initial flex-row flex-wrap justify-between">
             <div className="flex flex-auto flex-row flex-wrap space-x-4 justify-center md:justify-start">
-              <ConfirmationModalContextProvider confirmText="Are you sure you want a new puzzle?" confirmButtonText="New Puzzle">
+              <ConfirmationModalContextProvider confirmText="Are you sure you want a new puzzle? Your current game will be lost." confirmButtonText="New Puzzle">
                 <ButtonWithConfirmation className="button-outline" onClick={() => resetGameState()}>
                   New Puzzle
                 </ButtonWithConfirmation>
               </ConfirmationModalContextProvider>
-              <ConfirmationModalContextProvider confirmText="Are you sure you want to reveal the solution?" confirmButtonText="Reveal">
-                <ButtonWithConfirmation
-                  disabled={showSuccess || showFail}
-                  className="button-outline"
-                  onClick={() => {
-                    if (!showFail) {
-                      gameLogManager.updateForfeitCount();
-                      clearError();
-                      setShowFail(true);
-                    }
-                  }}
-                >
-                  Reveal Solution
-                </ButtonWithConfirmation>
-              </ConfirmationModalContextProvider>
+
+              {todaysPuzzle !== puzzleNumber && (
+                <>
+                  <ConfirmationModalContextProvider confirmText="Are you sure you want load Today's Puzzle? Your current game will be lost." confirmButtonText="Go To Today's Puzzle">
+                    <ButtonWithConfirmation className="button-outline button-positive" onClick={() => resetGameState(todaysPuzzle)} disabled={todaysPuzzle === puzzleNumber}>
+                      Go To Today's Puzzle
+                    </ButtonWithConfirmation>
+                  </ConfirmationModalContextProvider>
+                  <ConfirmationModalContextProvider confirmText="Are you sure you want to reveal the solution?" confirmButtonText="Reveal">
+                    <ButtonWithConfirmation
+                      disabled={showSuccess || showFail || todaysPuzzle === puzzleNumber}
+                      className="button-base underline"
+                      onClick={() => {
+                        if (!showFail) {
+                          gameLogManager.updateForfeitCount();
+                          clearError();
+                          setShowFail(true);
+                        }
+                      }}
+                    >
+                      Reveal Solution
+                    </ButtonWithConfirmation>
+                  </ConfirmationModalContextProvider>
+                </>
+              )}
             </div>
             <div className="hidden md:flex flex-initial flex-row flex-wrap justify-center items-center space-x-2">
               <strong>Difficulty:</strong>{" "}
@@ -466,7 +489,18 @@ function App() {
               </button>
             </div>
           </div>
-          <div className="flex flex-auto justify-center items-center">
+          <div className="flex flex-auto flex-col justify-center items-center">
+            {todaysPuzzle === puzzleNumber && (
+              <span className="text-lg font-bold pb-2">
+                Today's Puzzle -{' '}
+                {currentDate.toLocaleString("en-US", {
+                  month: "long",
+                  day: "numeric",
+                  year: "numeric",
+                })}
+              </span>
+            )}
+            {todaysPuzzle !== puzzleNumber && <span className="text-lg font-bold pb-2">Puzzle #{puzzleNumber}</span>}
             <GuessDisplay guessMap={guessMap} mapPointer={mapPointer} />
           </div>
           <div className="flex flex-initial flex-col">
@@ -506,8 +540,8 @@ function App() {
             ></Keyboard>
           </div>
         </div>
-        <div className="flex flex-initial flex-row justify-between border-t-2 border-slate-300 dark:border-slate-500 mt-4 py-4 text-xs">
-          <div className="flex flex-row space-x-4">
+        <div className="flex flex-initial flex-wrap flex-row justify-between border-t-2 border-slate-300 dark:border-slate-500 mt-4 py-4 text-xs">
+          <div className="flex flex-auto flex-row space-x-4">
             <a href="https://alexmj212.dev" className="underline">
               alexmj212.dev
             </a>
@@ -515,7 +549,8 @@ function App() {
               How Word Guess Works
             </a>
           </div>
-          <div className="flex flex-row space-x-4 justify-start items-end">
+          <div className="flex flex-auto flex-row space-x-4 justify-start md:justify-end items-end">
+            {todaysPuzzle !== puzzleNumber && <span>#{puzzleNumber}</span>}
             <span>Build: {document.querySelector('meta[name="build-version"]')?.getAttribute("build-version")}</span>
             <a href="https://www.github.com/alexmj212/word-guess" className="underline">
               Source
@@ -555,7 +590,7 @@ function App() {
       <Modal open={openStatsModal} setOpen={setOpenStatsModal} title="Word Guess Statistics">
         <StatBlock gameLog={gameLogManager.gameLog} />
         <div className="flex flex-auto flex-row justify-center mt-4">
-          <ConfirmationModalContextProvider confirmText="Are you sure you want to reset your statistics?" confirmButtonText="Reset">
+          <ConfirmationModalContextProvider confirmText="Are you sure you want to reset your statistics? Your current game will be lost." confirmButtonText="Reset">
             <ButtonWithConfirmation className="button-negative" onClick={handleStatisticsReset}>
               Reset Statistics
             </ButtonWithConfirmation>
@@ -573,7 +608,7 @@ function App() {
           <div className="grid-row">
             <dt className="grid-label">Difficulty</dt>
             <dd className="grid-field">
-              <ConfirmationModalContextProvider confirmText="Changing difficulty requires the current game to be reset. Are you sure you want to reset the game?" confirmButtonText="Reset">
+              <ConfirmationModalContextProvider confirmText="Are you sure you want to change the difficulty? Your current game will be lost." confirmButtonText="Reset">
                 <RadioWithConfirmation keys={Object.values(DifficultyOptions)} selectedValue={difficulty} keyDescription={difficultyDescriptions} onChange={handleDifficultyChange}></RadioWithConfirmation>
               </ConfirmationModalContextProvider>
             </dd>
