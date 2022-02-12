@@ -60,7 +60,7 @@ const Keyboard: React.FC<KeyboardType> = ({ letterOptions, qwerty, onSelect, dis
               </button>
             </React.Fragment>
           ))}
-          <button title="Guess Word" className={`keyboard-action bg-green-400 dark:bg-green-700`} onClick={onSubmit} disabled={disableSubmit}>
+          <button title="Guess Word" className={` text-xl keyboard-action bg-green-400 dark:bg-green-700`} onClick={onSubmit} disabled={disableSubmit}>
             Enter
           </button>
         </div>
