@@ -294,9 +294,6 @@ function App() {
       setMapPointer([mapPointer[0], mapPointer[1] + 1]);
       clearError();
     }
-    if (document && "activeElement" in document) {
-      (document.activeElement as HTMLElement).blur();
-    }
   };
 
   /**
