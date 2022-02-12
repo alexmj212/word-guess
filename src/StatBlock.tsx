@@ -9,19 +9,19 @@ const StatBlock: React.FC<StatBlockType> = ({ gameLog }) => {
   return (
     <dl>
       <div className="grid-row">
-        <dt className="grid-label">Games Played</dt>
+        <dt className="grid-label">Played</dt>
         <dd className="grid-field">{gameLog.gamesPlayed}</dd>
       </div>
       <div className="grid-row">
-        <dt className="grid-label">Games Won</dt>
+        <dt className="grid-label">Won</dt>
         <dd className="grid-field">{gameLog.winCount}</dd>
       </div>
       <div className="grid-row">
-        <dt className="grid-label">Current Win Streak</dt>
+        <dt className="grid-label">Current Streak</dt>
         <dd className="grid-field">{gameLog.winStreak}</dd>
       </div>
       <div className="grid-row">
-        <dt className="grid-label">Longest Win Streak</dt>
+        <dt className="grid-label">Longest Streak</dt>
         <dd className="grid-field">{gameLog.maxWinStreak}</dd>
       </div>
       <div className="grid-row">
@@ -29,11 +29,11 @@ const StatBlock: React.FC<StatBlockType> = ({ gameLog }) => {
         <dd className="grid-field">{gameLog.gamesPlayed ? ((+gameLog.winCount / +gameLog.gamesPlayed) * 100).toFixed(2) : "0"}%</dd>
       </div>
       <div className="grid-row">
-        <dt className="grid-label">Games Lost</dt>
+        <dt className="grid-label">Lost</dt>
         <dd className="grid-field">{gameLog.lossCount}</dd>
       </div>
       <div className="grid-row">
-        <dt className="grid-label">Games Forfeited</dt>
+        <dt className="grid-label">Forfeited</dt>
         <dd className="grid-field">{gameLog.forfeitCount}</dd>
       </div>
       <div className="grid-row">
