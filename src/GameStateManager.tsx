@@ -4,7 +4,7 @@ import { alphabet } from "./wordList";
 export enum DifficultyOptions {
   NORMAL = "normal",
   HARD = "hard",
-  HARDER = "very hard"
+  HARDER = "very hard",
 }
 
 export const difficultyDescriptions: { [key in DifficultyOptions]: string } = {
@@ -57,10 +57,11 @@ const DefaultGameState: GameState = {
   puzzleNumber: 0,
 };
 
-const GAME_STATE_KEY = "word-guess-state";
+export const GAME_STATE_KEY = "word-guess-state";
+export const TODAYS_GAME_STATE_KEY = "todays-word-guess-state";
 
 export class GameStateManager {
-  public gameState = JSON.parse(JSON.stringify(DefaultGameState));
+  public gameState: GameState = JSON.parse(JSON.stringify(DefaultGameState));
 
   constructor() {
     this._initializeState();
@@ -70,36 +71,51 @@ export class GameStateManager {
     this.gameState = this._getGameState();
   }
 
-  private _getGameState() {
+  private _getGameState(key = GAME_STATE_KEY): GameState {
     try {
-      const potentialGameState = localStorage.getItem(GAME_STATE_KEY);
+      const potentialGameState = localStorage.getItem(key);
       if (potentialGameState) {
-        return JSON.parse(potentialGameState);
+        this.gameState = JSON.parse(potentialGameState);
+        if (this.gameState.letterOptions.length) {
+          return this.gameState;
+        } else {
+          this.gameState = JSON.parse(JSON.stringify(DefaultGameState))
+          return this.gameState;
+        }
       } else {
         this.gameState = JSON.parse(JSON.stringify(DefaultGameState));
-        this._commitGameState();
+        this._commitGameState(key);
         return JSON.parse(JSON.stringify(DefaultGameState));
       }
     } catch {
       console.error("Error Parsing Game State");
+      return JSON.parse(JSON.stringify(DefaultGameState));
     }
   }
 
-  private _commitGameState() {
-    localStorage.setItem(GAME_STATE_KEY, JSON.stringify(this.gameState));
+  private _commitGameState(key: string) {
+    localStorage.setItem(key, JSON.stringify(this.gameState));
   }
 
   public generateNewGameState(): GameState {
     return JSON.parse(JSON.stringify(DefaultGameState));
   }
 
-  public saveGameState(newGameState: GameState) {
+  public loadGameState(key: string) {
+    return this._getGameState(key);
+  }
+
+  public saveGameState(newGameState: GameState, todaysGame: boolean) {
     this.gameState = newGameState;
-    this._commitGameState();
+    if (todaysGame) {
+      this._commitGameState(TODAYS_GAME_STATE_KEY);
+    } else {
+      this._commitGameState(GAME_STATE_KEY);
+    }
   }
 
   public resetGameState() {
     this.gameState = this.generateNewGameState();
-    this._commitGameState();
+    this._commitGameState(GAME_STATE_KEY);
   }
 }
