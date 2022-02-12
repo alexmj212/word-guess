@@ -14,7 +14,7 @@ import GuessDisplay from "./GuessDisplay";
 import Keyboard from "./Keyboard";
 import { GameLogManager } from "./GameLogManager";
 import StatBlock from "./StatBlock";
-import { DefaultLetter, difficultyDescriptions, DifficultyOptions, GameState, GameStateManager } from "./GameStateManager";
+import { DefaultLetter, difficultyDescriptions, DifficultyOptions, GameState, GameStateManager, TODAYS_GAME_STATE_KEY } from "./GameStateManager";
 import ConfirmationModalContextProvider from "./ConfirmationDialogContext";
 import { ButtonWithConfirmation } from "./ButtonWithConfirmation";
 import { RadioWithConfirmation } from "./RadioWithConfirmation";
@@ -31,6 +31,7 @@ export type LetterState = {
 export const THEME_STORAGE_KEY = "theme";
 export const KEYBOARD_STORAGE_KEY = "keyboard";
 export const DIFFICULTY_KEY = "difficulty";
+export const PUZZLE_TYPE_KEY = "puzzle-type";
 
 export enum ThemeOptions {
   DARK = "dark",
@@ -40,6 +41,11 @@ export enum ThemeOptions {
 export enum KeyboardState {
   ALPHEBET = "alphabet",
   QWERTY = "qwerty",
+}
+
+export enum PuzzleType {
+  RANDOM = "random",
+  TODAY = "today",
 }
 
 function App() {
@@ -59,8 +65,9 @@ function App() {
   const [disableBackspace, setDisableBackspace] = useState<boolean>(true);
 
   // Display State
-  const [keyboardDisplay, setKeyboardDisplay] = useState<KeyboardState>(localStorage.keyboard);
-  const [theme, setTheme] = useState<ThemeOptions>(localStorage.theme);
+  const [keyboardDisplay, setKeyboardDisplay] = useState<KeyboardState>((localStorage.getItem(KEYBOARD_STORAGE_KEY) as KeyboardState) || KeyboardState.QWERTY);
+  const [theme, setTheme] = useState<ThemeOptions>((localStorage.getItem(THEME_STORAGE_KEY) as ThemeOptions) || ThemeOptions.DARK);
+  const [puzzleType, setPuzzleType] = useState<PuzzleType>((localStorage.getItem(PUZZLE_TYPE_KEY) as PuzzleType) || PuzzleType.RANDOM);
 
   // Message Handling
   const [showError, setShowError] = useState<boolean>(false);
@@ -84,12 +91,30 @@ function App() {
    * Execute setup on initial load
    */
   useEffect(() => {
-    loadGameState(gameStateManager.gameState);
     determineKeyboard();
     determineDifficulty();
+    const storedPuzzleType = determinePuzzleType();
+
+    // Determine Daily Puzzle
     const startDate = new Date("2021-06-19");
     const today = new Date();
-    setTodaysPuzzle(Math.round(Math.abs((today.valueOf() - startDate.valueOf()) / (24 * 60 * 60 * 1000))));
+    const todaysPuzzleNumber = Math.round(Math.abs((today.valueOf() - startDate.valueOf()) / (24 * 60 * 60 * 1000))) - 1;
+    setTodaysPuzzle(todaysPuzzleNumber);
+
+    if (storedPuzzleType === PuzzleType.TODAY) {
+      // Load Progress from Today's Puzzle
+      const todaysGameState = gameStateManager.loadGameState(TODAYS_GAME_STATE_KEY);
+      if (todaysGameState.puzzleNumber === todaysPuzzleNumber) {
+        // If Today's puzzle is the same as the stored, load it
+        loadGameState(gameStateManager.loadGameState(TODAYS_GAME_STATE_KEY));
+      } else {
+        // otherwise, reset the game because the day has changed
+        setGameState(gameStateManager.generateNewGameState(), todaysPuzzleNumber);
+      }
+    } else {
+      // Load the progress their current puzzle
+      loadGameState(gameStateManager.gameState);
+    }
 
     // Show the rules on the first time
     setOpenRulesModal(gameLogManager.gameLog.gamesPlayed === 0 && gameLogManager.gameLog.guessCount === 0);
@@ -97,19 +122,24 @@ function App() {
 
   /**
    * Execute on game state change
+   *
+   * When letter's are entered, messages are shown, or the puzzle changes, preserve the game state
    */
   useEffect(() => {
-    gameStateManager.saveGameState({
-      guessMap: guessMap,
-      letterOptions: letterOptions,
-      cursorPointer: mapPointer,
-      showError: showError,
-      showFail: showFail,
-      showSuccess: showSuccess,
-      errorMessage: errorMessage,
-      puzzleNumber: puzzleNumber,
-    });
-  }, [guessMap, letterOptions, mapPointer, showSuccess, showFail, showError, errorMessage, puzzleNumber]); // eslint-disable-line react-hooks/exhaustive-deps
+    gameStateManager.saveGameState(
+      {
+        guessMap: guessMap,
+        letterOptions: letterOptions,
+        cursorPointer: mapPointer,
+        showError: showError,
+        showFail: showFail,
+        showSuccess: showSuccess,
+        errorMessage: errorMessage,
+        puzzleNumber: puzzleNumber,
+      },
+      localStorage.getItem(PUZZLE_TYPE_KEY) === PuzzleType.TODAY
+    );
+  }, [mapPointer, showSuccess, showFail, showError, errorMessage, puzzleNumber]); // eslint-disable-line react-hooks/exhaustive-deps
 
   /**
    * Execute on game display changes
@@ -137,25 +167,35 @@ function App() {
     }
   }, [showSuccess]);
 
+  const generatePuzzleNumber = () => {
+    return Math.floor(Math.random() * validWords.length);
+  };
+
+  /**
+   * Set the current puzzle to a specific one
+   * @param puzzleNumber
+   */
+  const setPuzzle = (puzzleNumber: number) => {
+    setSolution(validWords[puzzleNumber].toLocaleUpperCase());
+    setPuzzleNumber(puzzleNumber);
+  };
+
   /**
    * Select a puzzle from the list of options and set the game state as needed
    */
   const generateNewPuzzle = () => {
     // Generate a new puzzle
-    const randomWord = validWords[Math.floor(Math.random() * validWords.length)];
-    setSolution(randomWord.toLocaleUpperCase());
-    setPuzzleNumber(validWords.indexOf(randomWord));
-    gameStateManager.saveGameState({
-      ...gameStateManager.generateNewGameState(),
-      puzzleNumber: puzzleNumber,
-    });
+    const randomWord = validWords[generatePuzzleNumber()];
+    setPuzzle(validWords.indexOf(randomWord));
   };
 
   /**
-   * Load the saved game state
+   * Set the game state from the provided one
+   * If a specific puzzle number is provided, set that, otherwise, generate a new puzzle
    * @param gameState
+   * @param puzzleNumber
    */
-  const loadGameState = (gameState: GameState) => {
+  const setGameState = (gameState: GameState, puzzleNumber?: number) => {
     setGuessMap(gameState.guessMap);
     setLetterOptions(gameState.letterOptions);
     setMapPointer(gameState.cursorPointer);
@@ -163,40 +203,43 @@ function App() {
     setErrorMessage(gameState.errorMessage);
     setShowFail(gameState.showFail);
     setShowSuccess(gameState.showSuccess);
-    setPuzzleNumber(gameState.puzzleNumber);
-    // Load a previous Puzzle
-    if (gameStateManager.gameState.puzzleNumber !== 0) {
-      setSolution(validWords[gameStateManager.gameState.puzzleNumber].toLocaleUpperCase());
-      setPuzzleNumber(gameStateManager.gameState.puzzleNumber);
+    if (puzzleNumber) {
+      setPuzzle(puzzleNumber);
     } else {
       generateNewPuzzle();
     }
   };
 
   /**
-   * Performs a hard reset of the game state
-   * Depends on deep copy hack of the default game state
+   * Load the saved game state from the stored puzzle number
+   * @param gameState
    */
-  const resetGameState = (puzzleNumber?: number) => {
-    gameStateManager.resetGameState();
-    const defaultState: GameState = gameStateManager.generateNewGameState();
-    setGuessMap(defaultState.guessMap);
-    setLetterOptions(defaultState.letterOptions);
-    setMapPointer(defaultState.cursorPointer);
-    setShowError(defaultState.showError);
-    setErrorMessage(defaultState.errorMessage);
-    setShowFail(defaultState.showFail);
-    setShowSuccess(defaultState.showSuccess);
-    if (puzzleNumber) {
-      setSolution(validWords[puzzleNumber].toLocaleUpperCase());
-      setPuzzleNumber(puzzleNumber);
+  const loadGameState = (gameState: GameState) => {
+    setGameState(gameState, gameStateManager.gameState.puzzleNumber);
+  };
+
+  /**
+   * Reset game to todays puzzle or random
+   * Load todays puzzle or generate a new puzzle
+   * @param loadTodaysPuzzle
+   */
+  const resetGameState = (loadTodaysPuzzle?: boolean) => {
+    if (loadTodaysPuzzle) {
+      localStorage.setItem(PUZZLE_TYPE_KEY, PuzzleType.TODAY);
+      setGameState(gameStateManager.loadGameState(TODAYS_GAME_STATE_KEY), todaysPuzzle);
     } else {
-      generateNewPuzzle();
+      localStorage.setItem(PUZZLE_TYPE_KEY, PuzzleType.RANDOM);
+      gameStateManager.resetGameState();
+      setGameState(gameStateManager.generateNewGameState());
     }
   };
 
+  /**
+   * Determine the keyboard type from local storage
+   */
   const determineKeyboard = () => {
-    if (localStorage.keyboard) {
+    const storedKeyboard = (localStorage.getItem(KEYBOARD_STORAGE_KEY) || "") as KeyboardState;
+    if (Object.values(KeyboardState).includes(storedKeyboard)) {
       setKeyboardDisplay(localStorage.keyboard);
     } else {
       localStorage.setItem(KEYBOARD_STORAGE_KEY, KeyboardState.QWERTY);
@@ -204,12 +247,32 @@ function App() {
     }
   };
 
+  /**
+   * Determine the difficulty from local storage
+   */
   const determineDifficulty = () => {
-    if (localStorage.difficulty) {
+    const storedDifficulty = (localStorage.getItem(DIFFICULTY_KEY) || "") as DifficultyOptions;
+    if (Object.values(DifficultyOptions).includes(storedDifficulty)) {
       setDifficulty(localStorage.difficulty);
     } else {
       localStorage.setItem(DIFFICULTY_KEY, difficulty);
       setDifficulty(localStorage.difficulty);
+    }
+  };
+
+  /**
+   * Determine the puzzle type from local storage
+   * @returns PuzzleType
+   */
+  const determinePuzzleType = () => {
+    const storedPuzzleType: PuzzleType = (localStorage.getItem(PUZZLE_TYPE_KEY) || "") as PuzzleType;
+    if (Object.values(PuzzleType).includes(storedPuzzleType)) {
+      setPuzzleType(storedPuzzleType);
+      return storedPuzzleType;
+    } else {
+      localStorage.setItem(PUZZLE_TYPE_KEY, puzzleType);
+      setPuzzleType(puzzleType);
+      return puzzleType;
     }
   };
 
@@ -230,6 +293,9 @@ function App() {
       };
       setMapPointer([mapPointer[0], mapPointer[1] + 1]);
       clearError();
+    }
+    if (document && "activeElement" in document) {
+      (document.activeElement as HTMLElement).blur();
     }
   };
 
@@ -311,9 +377,7 @@ function App() {
         // Update keyboard state
         keyboardLetter.noMatch = true;
         // Add difficulty
-        if (difficulty === DifficultyOptions.HARDER) {
-          keyboardLetter.disabled = true;
-        }
+        keyboardLetter.disabled = true;
       }
 
       // Retroactively remove hints on duplicate letters
@@ -339,7 +403,9 @@ function App() {
     if (guess === solution) {
       gameLogManager.updateWinCount(guess, mapPointer[0] + 1);
       setMapPointer([mapPointer[0] + 1, 0]);
-      setShowSuccess(true);
+      setTimeout(() => {
+        setShowSuccess(true);
+      }, 2000);
       clearError();
       return;
     }
@@ -415,11 +481,13 @@ function App() {
     resetGameState();
   };
 
-  /** */
+  /**
+   * Changes the games difficulty
+   */
   const handleDifficultyChange = (difficulty: DifficultyOptions) => {
     localStorage.setItem(DIFFICULTY_KEY, difficulty);
     setDifficulty(difficulty);
-    resetGameState();
+    resetGameState(determinePuzzleType() === PuzzleType.TODAY);
   };
 
   return (
@@ -450,7 +518,7 @@ function App() {
         </div>
         <div className="flex flex-auto flex-col justify-center my-2">
           <div className="flex flex-initial flex-row flex-wrap justify-between">
-            <div className="flex flex-auto flex-row flex-wrap space-x-4 justify-center md:justify-start">
+            <div className="flex flex-auto flex-row flex-wrap space-x-1 md:space-x-4 justify-center md:justify-start">
               <ConfirmationModalContextProvider confirmText="Are you sure you want a new puzzle? Your current game will be lost." confirmButtonText="New Puzzle">
                 <ButtonWithConfirmation className="button-outline" onClick={() => resetGameState()}>
                   New Puzzle
@@ -460,14 +528,14 @@ function App() {
               {todaysPuzzle !== puzzleNumber && (
                 <>
                   <ConfirmationModalContextProvider confirmText="Are you sure you want load Today's Puzzle? Your current game will be lost." confirmButtonText="Go To Today's Puzzle">
-                    <ButtonWithConfirmation className="button-outline button-positive" onClick={() => resetGameState(todaysPuzzle)} disabled={todaysPuzzle === puzzleNumber}>
-                      Go To Today's Puzzle
+                    <ButtonWithConfirmation className="button-positive" onClick={() => resetGameState(true)} disabled={todaysPuzzle === puzzleNumber}>
+                      Today's Puzzle
                     </ButtonWithConfirmation>
                   </ConfirmationModalContextProvider>
                   <ConfirmationModalContextProvider confirmText="Are you sure you want to reveal the solution?" confirmButtonText="Reveal">
                     <ButtonWithConfirmation
                       disabled={showSuccess || showFail || todaysPuzzle === puzzleNumber}
-                      className="button-base underline"
+                      className="button-outline"
                       onClick={() => {
                         if (!showFail) {
                           gameLogManager.updateForfeitCount();
@@ -492,7 +560,7 @@ function App() {
           <div className="flex flex-auto flex-col justify-center items-center">
             {todaysPuzzle === puzzleNumber && (
               <span className="text-lg font-bold pb-2">
-                Today's Puzzle -{' '}
+                Today's Puzzle -{" "}
                 {currentDate.toLocaleString("en-US", {
                   month: "long",
                   day: "numeric",
@@ -532,7 +600,7 @@ function App() {
               qwerty={keyboardDisplay === KeyboardState.QWERTY}
               letterOptions={letterOptions}
               onSelect={onSelect}
-              disableSelect={(letter) => letter.disabled || showSuccess || showFail}
+              disableSelect={(letter) => (letter.disabled && difficulty === DifficultyOptions.HARDER) || showSuccess || showFail}
               onSubmit={onSubmit}
               disableSubmit={disableSubmit}
               onBackspace={onBackspace}
