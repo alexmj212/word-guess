@@ -19,6 +19,7 @@ import ConfirmationModalContextProvider from "./ConfirmationDialogContext";
 import { ButtonWithConfirmation } from "./ButtonWithConfirmation";
 import { RadioWithConfirmation } from "./RadioWithConfirmation";
 import { Slide, toast, ToastContainer } from "react-toastify";
+import ReactGA from "react-ga4";
 
 export type LetterState = {
   letter: string;
@@ -91,8 +92,8 @@ function App() {
    * Execute setup on initial load
    */
   useEffect(() => {
-    determineKeyboard();
-    determineDifficulty();
+    const storedKeyboard = determineKeyboard();
+    const storedDifficulty = determineDifficulty();
     const storedPuzzleType = determinePuzzleType();
 
     // Determine Daily Puzzle
@@ -118,6 +119,17 @@ function App() {
 
     // Show the rules on the first time
     setOpenRulesModal(gameLogManager.gameLog.gamesPlayed === 0 && gameLogManager.gameLog.guessCount === 0);
+
+    ReactGA.initialize("G-SXPVRPDJ9X", {
+      gaOptions: {
+        build: document.querySelector('meta[name="build-version"]')?.getAttribute("build-version"),
+        keyboardType: storedKeyboard,
+        difficulty: storedDifficulty,
+        puzzleType: storedPuzzleType,
+        puzzleNumber: gameStateManager.gameState.puzzleNumber,
+        theme: theme,
+      },
+    });
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   /**
@@ -240,10 +252,12 @@ function App() {
   const determineKeyboard = () => {
     const storedKeyboard = (localStorage.getItem(KEYBOARD_STORAGE_KEY) || "") as KeyboardState;
     if (Object.values(KeyboardState).includes(storedKeyboard)) {
-      setKeyboardDisplay(localStorage.keyboard);
+      setKeyboardDisplay(storedKeyboard);
+      return storedKeyboard;
     } else {
       localStorage.setItem(KEYBOARD_STORAGE_KEY, KeyboardState.QWERTY);
-      setKeyboardDisplay(localStorage.keyboard);
+      setKeyboardDisplay(KeyboardState.QWERTY);
+      return keyboardDisplay;
     }
   };
 
@@ -254,9 +268,11 @@ function App() {
     const storedDifficulty = (localStorage.getItem(DIFFICULTY_KEY) || "") as DifficultyOptions;
     if (Object.values(DifficultyOptions).includes(storedDifficulty)) {
       setDifficulty(localStorage.difficulty);
+      return storedDifficulty;
     } else {
       localStorage.setItem(DIFFICULTY_KEY, difficulty);
       setDifficulty(localStorage.difficulty);
+      return difficulty;
     }
   };
 
@@ -395,6 +411,11 @@ function App() {
 
     // Only check for success after the state of the letter is determined
     // This ensures displayed result is accurate
+    ReactGA.event({
+      category: "Gameplay",
+      action: "Guess Word",
+      label: guess,
+    });
 
     // Success
     if (guess === solution) {
@@ -404,6 +425,10 @@ function App() {
         setShowSuccess(true);
       }, 2000);
       clearError();
+      ReactGA.event({
+        category: "Game State",
+        action: "Solution Found",
+      });
       return;
     }
 
@@ -418,6 +443,10 @@ function App() {
       gameLogManager.updateLossCount();
       setShowFail(true);
       clearError();
+      ReactGA.event({
+        category: "Game State",
+        action: "Game Over",
+      });
       return;
     }
 
@@ -459,6 +488,13 @@ function App() {
         setTheme(ThemeOptions.LIGHT);
         break;
     }
+    ReactGA.event({
+      category: "Game State",
+      action: "Change Theme",
+    });
+    ReactGA.set({
+      theme: theme,
+    });
   };
 
   /**
@@ -468,6 +504,13 @@ function App() {
   const handleKeyboardSwitch = (keyboard: KeyboardState) => {
     localStorage.setItem(KEYBOARD_STORAGE_KEY, keyboard);
     setKeyboardDisplay(keyboard);
+    ReactGA.event({
+      category: "Game State",
+      action: "Change Keyboard Type",
+    });
+    ReactGA.set({
+      keyboardType: keyboard,
+    });
   };
 
   /**
@@ -475,7 +518,12 @@ function App() {
    */
   const handleStatisticsReset = () => {
     gameLogManager.resetGameLog();
-    resetGameState();
+    resetGameState(determinePuzzleType() === PuzzleType.TODAY);
+    ReactGA.event({
+      category: "Game State",
+      action: "Reset",
+      label: "Statistics",
+    });
   };
 
   /**
@@ -485,6 +533,13 @@ function App() {
     localStorage.setItem(DIFFICULTY_KEY, difficulty);
     setDifficulty(difficulty);
     resetGameState(determinePuzzleType() === PuzzleType.TODAY);
+    ReactGA.event({
+      category: "Game State",
+      action: "Change Difficulty",
+    });
+    ReactGA.set({
+      difficulty: difficulty,
+    });
   };
 
   return (
@@ -517,7 +572,17 @@ function App() {
           <div className="flex flex-initial flex-row flex-wrap justify-between">
             <div className="flex flex-auto flex-row flex-wrap space-x-1 md:space-x-4 justify-center md:justify-start">
               <ConfirmationModalContextProvider confirmText="Are you sure you want a new puzzle? Your current game will be lost." confirmButtonText="New Puzzle">
-                <ButtonWithConfirmation className="button-outline" onClick={() => resetGameState()}>
+                <ButtonWithConfirmation
+                  className="button-outline"
+                  onClick={() => {
+                    resetGameState();
+                    ReactGA.event({
+                      category: "Game State",
+                      action: "Reset",
+                      label: "New Puzzle",
+                    });
+                  }}
+                >
                   New Puzzle
                 </ButtonWithConfirmation>
               </ConfirmationModalContextProvider>
@@ -525,7 +590,18 @@ function App() {
               {todaysPuzzle !== puzzleNumber && (
                 <>
                   <ConfirmationModalContextProvider confirmText="Are you sure you want load Today's Puzzle? Your current game will be lost." confirmButtonText="Go To Today's Puzzle">
-                    <ButtonWithConfirmation className="button-positive" onClick={() => resetGameState(true)} disabled={todaysPuzzle === puzzleNumber}>
+                    <ButtonWithConfirmation
+                      className="button-positive"
+                      onClick={() => {
+                        resetGameState(true);
+                        ReactGA.event({
+                          category: "Game State",
+                          action: "Reset",
+                          label: "Today's Puzzle",
+                        });
+                      }}
+                      disabled={todaysPuzzle === puzzleNumber}
+                    >
                       Today's Puzzle
                     </ButtonWithConfirmation>
                   </ConfirmationModalContextProvider>
@@ -538,6 +614,10 @@ function App() {
                           gameLogManager.updateForfeitCount();
                           clearError();
                           setShowFail(true);
+                          ReactGA.event({
+                            category: "Gameplay",
+                            action: "Forfeit",
+                          });
                         }
                       }}
                     >
@@ -585,7 +665,17 @@ function App() {
                     </button>
                   </li>
                   <li>
-                    <button className="underline" onClick={() => resetGameState()}>
+                    <button
+                      className="underline"
+                      onClick={() => {
+                        resetGameState();
+                        ReactGA.event({
+                          category: "Game State",
+                          action: "Reset",
+                          label: "Try Another",
+                        });
+                      }}
+                    >
                       Try another?
                     </button>
                   </li>
