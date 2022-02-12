@@ -38,7 +38,7 @@ const Modal: React.FC<ModalProps> = ({ title, open, setOpen, isStatic = false, c
                 <div className="sm:flex sm:items-start">
                   <div className="w-full">
                     <div className="flex justify-between">
-                      <Dialog.Title as="h3" className="text-2xl leading-10 font-medium">
+                      <Dialog.Title as="h3" className="text-xl md:text-2xl leading-10 font-medium">
                         {title}
                       </Dialog.Title>
                       <button className="button-base" onClick={() => setOpen(false)} ref={closeRef}>
