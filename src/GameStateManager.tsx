@@ -22,6 +22,7 @@ export type GameState = {
   showError: boolean;
   errorMessage: string;
   puzzleNumber: number;
+  lastUpdated: number;
 };
 
 export const DefaultLetter: LetterState = {
@@ -55,6 +56,7 @@ const DefaultGameState: GameState = {
   showError: false,
   errorMessage: "",
   puzzleNumber: 0,
+  lastUpdated: Date.now(),
 };
 
 export const GAME_STATE_KEY = "word-guess-state";
@@ -79,7 +81,7 @@ export class GameStateManager {
         if (this.gameState.letterOptions.length) {
           return this.gameState;
         } else {
-          this.gameState = JSON.parse(JSON.stringify(DefaultGameState))
+          this.gameState = JSON.parse(JSON.stringify(DefaultGameState));
           return this.gameState;
         }
       } else {
@@ -94,7 +96,7 @@ export class GameStateManager {
   }
 
   private _commitGameState(key: string) {
-    localStorage.setItem(key, JSON.stringify(this.gameState));
+    localStorage.setItem(key, JSON.stringify({ ...this.gameState, lastUpdated: Date.now() }));
   }
 
   public generateNewGameState(): GameState {

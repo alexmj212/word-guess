@@ -148,6 +148,7 @@ function App() {
         showSuccess: showSuccess,
         errorMessage: errorMessage,
         puzzleNumber: puzzleNumber,
+        lastUpdated: Date.now(),
       },
       localStorage.getItem(PUZZLE_TYPE_KEY) === PuzzleType.TODAY
     );
