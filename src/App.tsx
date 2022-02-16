@@ -238,7 +238,14 @@ function App() {
   const resetGameState = (loadTodaysPuzzle?: boolean) => {
     if (loadTodaysPuzzle) {
       localStorage.setItem(PUZZLE_TYPE_KEY, PuzzleType.TODAY);
-      setGameState(gameStateManager.loadGameState(TODAYS_GAME_STATE_KEY), todaysPuzzle);
+      const todaysGameState = gameStateManager.loadGameState(TODAYS_GAME_STATE_KEY);
+      if (todaysGameState.puzzleNumber === todaysPuzzle) {
+        // If Today's puzzle is the same as the stored, load it
+        loadGameState(gameStateManager.loadGameState(TODAYS_GAME_STATE_KEY));
+      } else {
+        // otherwise, reset the game because the day has changed
+        setGameState(gameStateManager.generateNewGameState(), todaysPuzzle);
+      }
     } else {
       localStorage.setItem(PUZZLE_TYPE_KEY, PuzzleType.RANDOM);
       gameStateManager.resetGameState();
