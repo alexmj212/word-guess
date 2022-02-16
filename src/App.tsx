@@ -579,22 +579,37 @@ function App() {
         <div className="flex flex-auto flex-col justify-center my-2">
           <div className="flex flex-initial flex-row flex-wrap justify-between">
             <div className="flex flex-auto flex-row flex-wrap space-x-1 md:space-x-4 justify-center md:justify-start">
-              <ConfirmationModalContextProvider confirmText="Are you sure you want a new puzzle? Your current game will be lost." confirmButtonText="New Puzzle">
-                <ButtonWithConfirmation
+              {showSuccess ? (
+                <button
                   className="button-outline"
                   onClick={() => {
                     resetGameState();
                     ReactGA.event({
                       category: "Game State",
                       action: "Reset",
-                      label: "New Puzzle",
+                      label: "Try Another",
                     });
                   }}
                 >
-                  New Puzzle
-                </ButtonWithConfirmation>
-              </ConfirmationModalContextProvider>
-
+                  Try another?
+                </button>
+              ) : (
+                <ConfirmationModalContextProvider confirmText="Are you sure you want a new puzzle? Your current game will be lost." confirmButtonText="New Puzzle">
+                  <ButtonWithConfirmation
+                    className="button-outline"
+                    onClick={() => {
+                      resetGameState();
+                      ReactGA.event({
+                        category: "Game State",
+                        action: "Reset",
+                        label: "New Puzzle",
+                      });
+                    }}
+                  >
+                    New Puzzle
+                  </ButtonWithConfirmation>
+                </ConfirmationModalContextProvider>
+              )}
               {todaysPuzzle !== puzzleNumber && (
                 <>
                   <ConfirmationModalContextProvider confirmText="Are you sure you want load Today's Puzzle? Your current game will be lost." confirmButtonText="Go To Today's Puzzle">
