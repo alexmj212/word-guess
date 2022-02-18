@@ -1,7 +1,6 @@
 import React from "react";
 import { LetterState } from "./App";
 import utilities from "./util";
-import { alphabet, emojiAlphabet } from "./wordList";
 
 type GuessDisplayType = {
   guessMap: LetterState[][];

@@ -1,5 +1,5 @@
 import { LetterState } from "./App";
-import { alphabet, emojiAlphabet } from "./wordList";
+import { alphabet } from "./wordList";
 
 export enum DifficultyOptions {
   NORMAL = "normal",
