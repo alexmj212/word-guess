@@ -1,4 +1,5 @@
 import { LetterState } from "./App";
+import { alphabet, emojiAlphabet } from "./wordList";
 
 const utilities = {
   determineLetterClass: (letterState: LetterState) => {
@@ -36,6 +37,12 @@ const utilities = {
   },
   previousGuess: (guess: string, guessArray: LetterState[][], mapPointer: number[]): boolean => {
     return guessArray.slice(0, mapPointer[0]).some((row) => row.map((letter) => letter.letter).join("") === guess);
+  },
+  generateEmojiString: (word: string): string => {
+    return word
+      .split("")
+      .map((letter) => emojiAlphabet[alphabet.indexOf(letter)])
+      .join("");
   },
 };
 

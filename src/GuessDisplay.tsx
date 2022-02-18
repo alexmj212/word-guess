@@ -1,17 +1,23 @@
 import React from "react";
 import { LetterState } from "./App";
 import utilities from "./util";
+import { alphabet, emojiAlphabet } from "./wordList";
 
 type GuessDisplayType = {
   guessMap: LetterState[][];
   mapPointer: number[];
+  showEmoji?: boolean;
 };
 
 const cursorDisplay = " ";
 
-const GuessDisplay: React.FC<GuessDisplayType> = ({ guessMap, mapPointer }) => {
+const GuessDisplay: React.FC<GuessDisplayType> = ({ guessMap, mapPointer, showEmoji }) => {
   const cursor = (row: number, index: number, letter: LetterState): string => {
-    return row === mapPointer[0] && index === mapPointer[1] && !letter.letter ? cursorDisplay : letter.letter;
+    if (row === mapPointer[0] && index === mapPointer[1] && !letter.letter) {
+      return cursorDisplay
+    } else {
+      return showEmoji ? utilities.generateEmojiString(letter.letter) : letter.letter;
+    }
   };
 
   // Tailwind doesn't allow arbitrary strings as classes, they must be computing beforehand

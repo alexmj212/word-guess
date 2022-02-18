@@ -346,14 +346,14 @@ function App() {
         // Ensure the word is contained within all the possible words
         if (utilities.previousGuess(guessedWord, guessMap, mapPointer)) {
           // Check if word has already been tried
-          toast.warn(`You already tried ${guessedWord}.`);
+          toast.warn(`You already tried ${difficulty === DifficultyOptions.EMOJI ? utilities.generateEmojiString(guessedWord) : guessedWord}.`);
         } else {
           validateWord(guessedWord);
         }
       } else {
         // Not a valid word
         gameLogManager.updateInvalidWordCount();
-        toast.warn(`${guessedWord} is not a word!`);
+        toast.warn(`${difficulty === DifficultyOptions.EMOJI ? utilities.generateEmojiString(guessedWord) : guessedWord} is not a word!`);
       }
     }
   };
@@ -669,13 +669,13 @@ function App() {
               </span>
             )}
             {todaysPuzzle !== puzzleNumber && <span className="text-lg font-bold pb-2">Puzzle #{puzzleNumber}</span>}
-            <GuessDisplay guessMap={guessMap} mapPointer={mapPointer} />
+            <GuessDisplay guessMap={guessMap} mapPointer={mapPointer} showEmoji={difficulty === DifficultyOptions.EMOJI} />
           </div>
           <div className="flex flex-initial flex-col">
             {(showFail || showSuccess) && (
               <div className="flex flex-col justify-center items-center">
-                {showFail && <Toast type={ToastTypes.ERROR} message={`Sorry! The word was ${solution}`} />}
-                {showSuccess && <Toast type={ToastTypes.SUCCESS} message={`Success! The word is ${solution}!`} />}
+                {showFail && <Toast type={ToastTypes.ERROR} message={`Sorry! The word was ${difficulty === DifficultyOptions.EMOJI ? utilities.generateEmojiString(solution) : solution}`} />}
+                {showSuccess && <Toast type={ToastTypes.SUCCESS} message={`Success! The word is ${difficulty === DifficultyOptions.EMOJI ? utilities.generateEmojiString(solution) : solution}!`} />}
                 <ul className="list-none flex flex-row space-x-4">
                   <li>
                     <button className="underline" onClick={() => setOpenShareModal(true)}>
@@ -708,6 +708,7 @@ function App() {
             <ToastContainer position="top-center" transition={Slide} limit={1} autoClose={3000} hideProgressBar newestOnTop={false} closeOnClick rtl={false} pauseOnHover pauseOnFocusLoss draggable theme="colored" closeButton={false}></ToastContainer>
             <Keyboard
               qwerty={keyboardDisplay === KeyboardState.QWERTY}
+              showEmoji={difficulty === DifficultyOptions.EMOJI}
               letterOptions={letterOptions}
               onSelect={onSelect}
               disableSelect={(letter) => (letter.disabled && difficulty === DifficultyOptions.HARDER) || showSuccess || showFail}
@@ -775,7 +776,15 @@ function App() {
           </ConfirmationModalContextProvider>
         </div>
       </Modal>
-      <Modal open={(showSuccess || showFail) && openShareModal} setOpen={setOpenShareModal} title={showSuccess ? `Success! The word is ${solution}` : `Sorry! The word was ${solution}`}>
+      <Modal
+        open={(showSuccess || showFail) && openShareModal}
+        setOpen={setOpenShareModal}
+        title={
+          showSuccess
+            ? `Success! The word is ${difficulty === DifficultyOptions.EMOJI ? utilities.generateEmojiString(solution) : solution}`
+            : `Sorry! The word was ${difficulty === DifficultyOptions.EMOJI ? utilities.generateEmojiString(solution) : solution}`
+        }
+      >
         <div className="flex flex-col justify-center mb-4">
           <pre className="bg-slate-200 dark:bg-slate-800 px-4 py-2 rounded-md">{utilities.generateShareText(guessMap, puzzleNumber, showFail)}</pre>
         </div>

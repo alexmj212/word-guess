@@ -1,16 +1,18 @@
 import { LetterState } from "./App";
-import { alphabet } from "./wordList";
+import { alphabet, emojiAlphabet } from "./wordList";
 
 export enum DifficultyOptions {
   NORMAL = "normal",
   HARD = "hard",
   HARDER = "very hard",
+  EMOJI = "emoji",
 }
 
 export const difficultyDescriptions: { [key in DifficultyOptions]: string } = {
   [DifficultyOptions.NORMAL]: "Standard Wordle Rules",
   [DifficultyOptions.HARD]: "Any revealed hints must be used in subsequent guesses.",
   [DifficultyOptions.HARDER]: "Any revealed hints must be used in subsequent guesses. You can't reuse letters that aren't in the solution.",
+  [DifficultyOptions.EMOJI]: "Standard Wordle Rules but Emoji instead of letters.",
 };
 
 export type GameState = {
