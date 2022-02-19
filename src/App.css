@@ -58,20 +58,20 @@ body {
 
 .button-outline {
   @apply button;
-  @apply py-1;
   @apply border-slate-300 dark:border-slate-500;
+  @apply py-1 md:px-4;
 }
 
 .button-positive {
   @apply button;
   @apply bg-green-400 dark:bg-green-700;
-  @apply md:px-4;
+  @apply py-1 md:px-4;
 }
 
 .button-negative {
   @apply button;
   @apply bg-red-400 dark:bg-red-700;
-  @apply md:px-4;
+  @apply py-1 md:px-4;
 }
 
 .keyboard-action {
