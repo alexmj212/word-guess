@@ -48,6 +48,7 @@ const ConfirmationModalContextProvider = ({
         open={showConfirmationModal}
         setOpen={setShowConfirmationModal}
         title="Confirm"
+        isConfirmation
       >
         <div className="flex flex-auto flex-col">
           <div className="flex flex-auto flex-row justify-center my-8">
