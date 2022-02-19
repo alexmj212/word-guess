@@ -35,7 +35,7 @@ const Keyboard: React.FC<KeyboardType> = ({ letterOptions, qwerty, showEmoji, on
         <div className="flex flex-row justify-center">
           {letterOptions.slice(0, 10).map((letter) => (
             <React.Fragment key={letter.letter}>
-              <button onClick={() => onSelect(letter.letter)} value={letter.letter} title={letter.letter} className={`button letter-option qwerty-option ${utilities.determineLetterClass(letter)}`} disabled={disableSelect(letter)}>
+              <button onClick={() => onSelect(letter.letter)} value={letter.letter} title={showEmoji ? emojiAlphabet[alphabet.indexOf(letter.letter)] : letter.letter} className={`button letter-option qwerty-option ${utilities.determineLetterClass(letter)}`} disabled={disableSelect(letter)}>
                 {showEmoji ? emojiAlphabet[alphabet.indexOf(letter.letter)] : letter.letter}
               </button>
             </React.Fragment>
@@ -45,7 +45,7 @@ const Keyboard: React.FC<KeyboardType> = ({ letterOptions, qwerty, showEmoji, on
           {" "}
           {letterOptions.slice(10, 19).map((letter) => (
             <React.Fragment key={letter.letter}>
-              <button onClick={() => onSelect(letter.letter)} value={letter.letter} title={letter.letter} className={`button letter-option qwerty-option ${utilities.determineLetterClass(letter)}`} disabled={disableSelect(letter)}>
+              <button onClick={() => onSelect(letter.letter)} value={letter.letter} title={showEmoji ? emojiAlphabet[alphabet.indexOf(letter.letter)] : letter.letter} className={`button letter-option qwerty-option ${utilities.determineLetterClass(letter)}`} disabled={disableSelect(letter)}>
                 {showEmoji ? emojiAlphabet[alphabet.indexOf(letter.letter)] : letter.letter}
               </button>
             </React.Fragment>
@@ -58,7 +58,7 @@ const Keyboard: React.FC<KeyboardType> = ({ letterOptions, qwerty, showEmoji, on
           </button>
           {letterOptions.slice(19, letterOptions.length).map((letter) => (
             <React.Fragment key={letter.letter}>
-              <button onClick={() => onSelect(letter.letter)} value={letter.letter} title={letter.letter} className={`button letter-option qwerty-option ${utilities.determineLetterClass(letter)}`} disabled={disableSelect(letter)}>
+              <button onClick={() => onSelect(letter.letter)} value={letter.letter} title={showEmoji ? emojiAlphabet[alphabet.indexOf(letter.letter)] : letter.letter} className={`button letter-option qwerty-option ${utilities.determineLetterClass(letter)}`} disabled={disableSelect(letter)}>
                 {showEmoji ? emojiAlphabet[alphabet.indexOf(letter.letter)] : letter.letter}
               </button>
             </React.Fragment>
