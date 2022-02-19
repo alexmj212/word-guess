@@ -24,5 +24,6 @@
     "react": {
       "version": "detect"
     }
-  }
+  },
+  "ignorePatterns": ["**/*.css"]
 }

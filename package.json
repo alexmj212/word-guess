@@ -26,6 +26,7 @@
     "start": "export REACT_APP_VERSION=$(git rev-parse --short=7 HEAD) && react-scripts start",
     "lint": "npx eslint ./src",
     "lint:fix": "npx eslint --fix ./src",
+    "lint:precommit": "npx eslint --fix",
     "build": "react-scripts build && npm run build-number",
     "build-number": "export REACT_APP_VERSION=$(git rev-parse --short=7 HEAD) && sed -i -- 's/%REACT_APP_VERSION%/'$REACT_APP_VERSION'/g' build/index.html",
     "test": "react-scripts test",
@@ -65,6 +66,6 @@
     "tailwindcss": "^3.0.13"
   },
   "lint-staged": {
-    "**/*": "npm run lint:fix"
+    "**/*": "npm run lint:precommit"
   }
 }
