@@ -5,6 +5,7 @@ import {
   BookOpenIcon,
   ChartBarIcon,
   CogIcon,
+  ShareIcon,
 } from "@heroicons/react/outline";
 import { RadioGroup } from "@headlessui/react";
 import { useHotkeys } from "react-hotkeys-hook";
@@ -13,7 +14,6 @@ import "./App.css";
 import logo from "./word-guess-logo.png";
 import Modal from "./Modal";
 import { alphabet, guessWords, validWords } from "./wordList";
-import Toast, { ToastTypes } from "./Toast";
 import utilities from "./util";
 import GuessDisplay from "./GuessDisplay";
 import Keyboard from "./Keyboard";
@@ -32,6 +32,7 @@ import { ButtonWithConfirmation } from "./ButtonWithConfirmation";
 import { RadioWithConfirmation } from "./RadioWithConfirmation";
 import { Slide, toast, ToastContainer } from "react-toastify";
 import ReactGA from "react-ga4";
+import Countdown from "./Countdown";
 
 export type LetterState = {
   letter: string;
@@ -297,6 +298,7 @@ function App() {
       const todaysGameState = gameStateManager.loadGameState(
         TODAYS_GAME_STATE_KEY
       );
+      setPuzzleType(PuzzleType.TODAY);
       if (todaysGameState.puzzleNumber === todaysPuzzle) {
         // If Today's puzzle is the same as the stored, load it
         loadGameState(gameStateManager.loadGameState(TODAYS_GAME_STATE_KEY));
@@ -306,9 +308,12 @@ function App() {
       }
     } else {
       localStorage.setItem(PUZZLE_TYPE_KEY, PuzzleType.RANDOM);
+      setPuzzleType(PuzzleType.RANDOM);
       gameStateManager.resetGameState();
       setGameState(gameStateManager.generateNewGameState());
     }
+    toast.dismiss();
+    toast.clearWaitingQueue();
   };
 
   /**
@@ -702,9 +707,9 @@ function App() {
         <div className="flex flex-auto flex-col justify-center my-2">
           <div className="flex flex-initial flex-row flex-wrap justify-between">
             <div className="flex flex-auto flex-row flex-wrap space-x-1 md:space-x-4 justify-center md:justify-start">
-              {showSuccess ? (
+              {showSuccess || showFail ? (
                 <button
-                  className="button-outline"
+                  className="button-positive"
                   onClick={() => {
                     resetGameState();
                     ReactGA.event({
@@ -739,8 +744,8 @@ function App() {
               {todaysPuzzle !== puzzleNumber && (
                 <>
                   <ConfirmationModalContextProvider
-                    confirmText="Are you sure you want load Today's Puzzle? Your current game will be lost."
-                    confirmButtonText="Go To Today's Puzzle"
+                    confirmText="Are you sure you want load Daily Puzzle? Your current game will be lost."
+                    confirmButtonText="Go To Daily Puzzle"
                   >
                     <ButtonWithConfirmation
                       className="button-positive"
@@ -754,7 +759,7 @@ function App() {
                       }}
                       disabled={todaysPuzzle === puzzleNumber}
                     >
-                      {"Today's Puzzle"}
+                      {"Daily Puzzle"}
                     </ButtonWithConfirmation>
                   </ConfirmationModalContextProvider>
                   <ConfirmationModalContextProvider
@@ -771,6 +776,14 @@ function App() {
                           gameLogManager.updateForfeitCount();
                           clearError();
                           setShowFail(true);
+                          toast.error(
+                            `Sorry, the solution is ${
+                              difficulty === DifficultyOptions.EMOJI
+                                ? utilities.generateEmojiString(solution)
+                                : solution
+                            }.`,
+                            { autoClose: false, closeButton: true }
+                          );
                           ReactGA.event({
                             category: "Gameplay",
                             action: "Forfeit",
@@ -797,7 +810,7 @@ function App() {
           <div className="flex flex-auto flex-col justify-center items-center">
             {todaysPuzzle === puzzleNumber && (
               <span className="text-lg font-bold pb-2">
-                {"Today's Puzzle - "}
+                {"Daily Puzzle - "}
                 {currentDate.toLocaleString("en-US", {
                   month: "long",
                   day: "numeric",
@@ -816,62 +829,32 @@ function App() {
               showEmoji={difficulty === DifficultyOptions.EMOJI}
             />
           </div>
-          <div className="flex flex-initial flex-col">
+          <div className="flex flex-initial flex-col flex-auto justify-between">
             {(showFail || showSuccess) && (
-              <div className="flex flex-col justify-center items-center">
-                {showFail && (
-                  <Toast
-                    type={ToastTypes.ERROR}
-                    message={`Sorry! The word was ${
-                      difficulty === DifficultyOptions.EMOJI
-                        ? utilities.generateEmojiString(solution)
-                        : solution
-                    }`}
-                  />
-                )}
-                {showSuccess && (
-                  <Toast
-                    type={ToastTypes.SUCCESS}
-                    message={`Success! The word is ${
-                      difficulty === DifficultyOptions.EMOJI
-                        ? utilities.generateEmojiString(solution)
-                        : solution
-                    }!`}
-                  />
-                )}
-                <ul className="list-none flex flex-row space-x-4">
-                  <li>
-                    <button
-                      className="underline"
-                      onClick={() => setOpenShareModal(true)}
-                    >
-                      Share Results
-                    </button>
-                  </li>
-                  <li>
-                    <button
-                      className="underline"
-                      onClick={() => setOpenStatsModal(true)}
-                    >
-                      View Your Stats
-                    </button>
-                  </li>
-                  <li>
-                    <button
-                      className="underline"
-                      onClick={() => {
-                        resetGameState();
-                        ReactGA.event({
-                          category: "Game State",
-                          action: "Reset",
-                          label: "Try Another",
-                        });
-                      }}
-                    >
-                      Try another?
-                    </button>
-                  </li>
-                </ul>
+              <div className="flex flex-col flex-auto justify-center items-center">
+                {puzzleType === PuzzleType.TODAY && <Countdown></Countdown>}
+                <div className="flex flex-row justify-center items-center space-x-1 md:space-x-4 my-2">
+                  <button
+                    className="button-outline"
+                    onClick={() => setOpenShareModal(true)}
+                  >
+                    View Results
+                  </button>
+
+                  <button
+                    className="button-positive"
+                    onClick={() => {
+                      resetGameState();
+                      ReactGA.event({
+                        category: "Game State",
+                        action: "Reset",
+                        label: "Try Another",
+                      });
+                    }}
+                  >
+                    Try another?
+                  </button>
+                </div>
               </div>
             )}
             <ToastContainer
@@ -974,7 +957,7 @@ function App() {
         setOpen={setOpenStatsModal}
         title="Word Guess Statistics"
       >
-        <StatBlock gameLog={gameLogManager.gameLog} />
+        <StatBlock gameLog={gameLogManager.gameLog} showFull />
         <div className="flex flex-auto flex-row justify-center mt-4">
           <ConfirmationModalContextProvider
             confirmText="Are you sure you want to reset your statistics? Your current game will be lost."
@@ -992,26 +975,42 @@ function App() {
       <Modal
         open={(showSuccess || showFail) && openShareModal}
         setOpen={setOpenShareModal}
-        title={
-          showSuccess
-            ? `Success! The word is ${
-                difficulty === DifficultyOptions.EMOJI
-                  ? utilities.generateEmojiString(solution)
-                  : solution
-              }`
-            : `Sorry! The word was ${
-                difficulty === DifficultyOptions.EMOJI
-                  ? utilities.generateEmojiString(solution)
-                  : solution
-              }`
-        }
+        title={"Share Your Results"}
       >
-        <div className="flex flex-col justify-center mb-4">
-          <pre className="bg-slate-200 dark:bg-slate-800 px-4 py-2 rounded-md">
-            {utilities.generateShareText(guessMap, puzzleNumber, showFail)}
-          </pre>
-        </div>
         <StatBlock gameLog={gameLogManager.gameLog} />
+        {puzzleType === PuzzleType.TODAY && <Countdown></Countdown>}
+        <div className="flex flex-row space-x-2 mt-4">
+          <button
+            className="button-outline w-full h-12"
+            onClick={() => {
+              navigator.clipboard
+                .writeText(
+                  utilities.generateShareText(guessMap, puzzleNumber, showFail)
+                )
+                .then(() => {
+                  toast.success("Copied to clipboard");
+                })
+                .catch(() => {
+                  toast.error("Failed to copy to clipboard");
+                });
+            }}
+          >
+            <ShareIcon className="w-6 h-6 inline-block mr-2" /> Share Results
+          </button>
+          <button
+            className="button-positive w-full"
+            onClick={() => {
+              resetGameState();
+              ReactGA.event({
+                category: "Game State",
+                action: "Reset",
+                label: "Try Another",
+              });
+            }}
+          >
+            Try Another?
+          </button>
+        </div>
       </Modal>
       <Modal
         open={openSettingsModal}
