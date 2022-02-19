@@ -1,14 +1,19 @@
-import React from "react";
+import * as React from "react";
 import { useConfirmationModalContext } from "./ConfirmationDialogContext";
 
 type ButtonWithConfirmationType = {
-  onClick: Function;
+  onClick: () => void;
   disabled?: boolean;
   className: string;
   children?: React.ReactNode;
 };
 
-export const ButtonWithConfirmation = ({ children, className, onClick, disabled }: ButtonWithConfirmationType) => {
+export const ButtonWithConfirmation = ({
+  children,
+  className,
+  onClick,
+  disabled,
+}: ButtonWithConfirmationType) => {
   const modalContext = useConfirmationModalContext();
 
   const handleOnClick = async () => {

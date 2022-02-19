@@ -87,7 +87,6 @@ body {
   @apply p-0;
   @apply w-8 h-12;
   @apply md:w-12 md:h-12;
-  
 }
 
 .qwerty-option {
@@ -124,17 +123,20 @@ body {
   @apply text-sm font-light;
 }
 
-.no-match, .flip-card-back.no-match {
+.no-match,
+.flip-card-back.no-match {
   @apply bg-slate-300 dark:bg-slate-800;
   @apply border-slate-300 dark:border-slate-800;
 }
 
-.contain-match, .flip-card-back.contain-match {
+.contain-match,
+.flip-card-back.contain-match {
   @apply bg-yellow-400 dark:bg-yellow-700;
   @apply border-yellow-400 dark:border-yellow-700;
 }
 
-.position-match, .flip-card-back.position-match {
+.position-match,
+.flip-card-back.position-match {
   @apply bg-green-500 dark:bg-green-700;
   @apply border-green-500 dark:border-green-700;
 }

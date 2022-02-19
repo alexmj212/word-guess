@@ -1,6 +1,11 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 
-import { BackspaceIcon, BookOpenIcon, ChartBarIcon, CogIcon } from "@heroicons/react/outline";
+import {
+  BackspaceIcon,
+  BookOpenIcon,
+  ChartBarIcon,
+  CogIcon,
+} from "@heroicons/react/outline";
 import { RadioGroup } from "@headlessui/react";
 import { useHotkeys } from "react-hotkeys-hook";
 import "react-toastify/dist/ReactToastify.min.css";
@@ -14,7 +19,14 @@ import GuessDisplay from "./GuessDisplay";
 import Keyboard from "./Keyboard";
 import { GameLogManager } from "./GameLogManager";
 import StatBlock from "./StatBlock";
-import { DefaultLetter, difficultyDescriptions, DifficultyOptions, GameState, GameStateManager, TODAYS_GAME_STATE_KEY } from "./GameStateManager";
+import {
+  DefaultLetter,
+  difficultyDescriptions,
+  DifficultyOptions,
+  GameState,
+  GameStateManager,
+  TODAYS_GAME_STATE_KEY,
+} from "./GameStateManager";
 import ConfirmationModalContextProvider from "./ConfirmationDialogContext";
 import { ButtonWithConfirmation } from "./ButtonWithConfirmation";
 import { RadioWithConfirmation } from "./RadioWithConfirmation";
@@ -56,7 +68,9 @@ function App() {
   const [mapPointer, setMapPointer] = useState<[number, number]>([0, 0]); // x,y coords of cursor
   const [puzzleNumber, setPuzzleNumber] = useState<number>(0); // in the index of the puzzle from the array of solutions
   const [solution, setSolution] = useState<string>(""); // the solution
-  const [difficulty, setDifficulty] = useState<DifficultyOptions>(DifficultyOptions.NORMAL); // the game difficulty
+  const [difficulty, setDifficulty] = useState<DifficultyOptions>(
+    DifficultyOptions.NORMAL
+  ); // the game difficulty
 
   const [todaysPuzzle, setTodaysPuzzle] = useState<number>(0);
   const currentDate = new Date();
@@ -66,9 +80,17 @@ function App() {
   const [disableBackspace, setDisableBackspace] = useState<boolean>(true);
 
   // Display State
-  const [keyboardDisplay, setKeyboardDisplay] = useState<KeyboardState>((localStorage.getItem(KEYBOARD_STORAGE_KEY) as KeyboardState) || KeyboardState.QWERTY);
-  const [theme, setTheme] = useState<ThemeOptions>((localStorage.getItem(THEME_STORAGE_KEY) as ThemeOptions) || ThemeOptions.DARK);
-  const [puzzleType, setPuzzleType] = useState<PuzzleType>((localStorage.getItem(PUZZLE_TYPE_KEY) as PuzzleType) || PuzzleType.RANDOM);
+  const [keyboardDisplay, setKeyboardDisplay] = useState<KeyboardState>(
+    (localStorage.getItem(KEYBOARD_STORAGE_KEY) as KeyboardState) ||
+      KeyboardState.QWERTY
+  );
+  const [theme, setTheme] = useState<ThemeOptions>(
+    (localStorage.getItem(THEME_STORAGE_KEY) as ThemeOptions) ||
+      ThemeOptions.DARK
+  );
+  const [puzzleType, setPuzzleType] = useState<PuzzleType>(
+    (localStorage.getItem(PUZZLE_TYPE_KEY) as PuzzleType) || PuzzleType.RANDOM
+  );
 
   // Message Handling
   const [showError, setShowError] = useState<boolean>(false);
@@ -99,18 +121,28 @@ function App() {
     // Determine Daily Puzzle
     const startDate = new Date("2021-06-19");
     const today = new Date();
-    const todaysPuzzleNumber = Math.round(Math.abs((today.valueOf() - startDate.valueOf()) / (24 * 60 * 60 * 1000))) - 1;
+    const todaysPuzzleNumber =
+      Math.round(
+        Math.abs(
+          (today.valueOf() - startDate.valueOf()) / (24 * 60 * 60 * 1000)
+        )
+      ) - 1;
     setTodaysPuzzle(todaysPuzzleNumber);
 
     if (storedPuzzleType === PuzzleType.TODAY) {
       // Load Progress from Today's Puzzle
-      const todaysGameState = gameStateManager.loadGameState(TODAYS_GAME_STATE_KEY);
+      const todaysGameState = gameStateManager.loadGameState(
+        TODAYS_GAME_STATE_KEY
+      );
       if (todaysGameState.puzzleNumber === todaysPuzzleNumber) {
         // If Today's puzzle is the same as the stored, load it
         loadGameState(gameStateManager.loadGameState(TODAYS_GAME_STATE_KEY));
       } else {
         // otherwise, reset the game because the day has changed
-        setGameState(gameStateManager.generateNewGameState(), todaysPuzzleNumber);
+        setGameState(
+          gameStateManager.generateNewGameState(),
+          todaysPuzzleNumber
+        );
       }
     } else {
       // Load the progress their current puzzle
@@ -118,11 +150,16 @@ function App() {
     }
 
     // Show the rules on the first time
-    setOpenRulesModal(gameLogManager.gameLog.gamesPlayed === 0 && gameLogManager.gameLog.guessCount === 0);
+    setOpenRulesModal(
+      gameLogManager.gameLog.gamesPlayed === 0 &&
+        gameLogManager.gameLog.guessCount === 0
+    );
 
     ReactGA.initialize("G-SXPVRPDJ9X", {
       gaOptions: {
-        build: document.querySelector('meta[name="build-version"]')?.getAttribute("build-version"),
+        build: document
+          .querySelector('meta[name="build-version"]')
+          ?.getAttribute("build-version"),
         keyboardType: storedKeyboard,
         difficulty: storedDifficulty,
         puzzleType: storedPuzzleType,
@@ -152,7 +189,15 @@ function App() {
       },
       localStorage.getItem(PUZZLE_TYPE_KEY) === PuzzleType.TODAY
     );
-  }, [mapPointer, showSuccess, showFail, showError, errorMessage, puzzleNumber]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [
+    // eslint-disable-line react-hooks/exhaustive-deps
+    mapPointer,
+    showSuccess,
+    showFail,
+    showError,
+    errorMessage,
+    puzzleNumber,
+  ]);
 
   /**
    * Execute on game display changes
@@ -162,11 +207,21 @@ function App() {
     if (showSuccess || showFail) {
       setDisableSubmit(true);
       setDisableBackspace(true);
-    } else if (guessMap.length > 0 && mapPointer[0] >= 0 && mapPointer[0] < guessMap.length) {
+    } else if (
+      guessMap.length > 0 &&
+      mapPointer[0] >= 0 &&
+      mapPointer[0] < guessMap.length
+    ) {
       // Disable submit as long as the row doesn't have 5 letters or the puzzle was solved
-      setDisableSubmit(!showSuccess && guessMap[mapPointer[0]].map((letter) => letter.letter).join("").length !== 5);
+      setDisableSubmit(
+        !showSuccess &&
+          guessMap[mapPointer[0]].map((letter) => letter.letter).join("")
+            .length !== 5
+      );
       // Disable backspace if there aren't any letters to remove yet
-      setDisableBackspace(guessMap[mapPointer[0]].every((letter) => letter.letter === ""));
+      setDisableBackspace(
+        guessMap[mapPointer[0]].every((letter) => letter.letter === "")
+      );
     }
   }, [guessMap, letterOptions, mapPointer, showSuccess, showFail]);
 
@@ -239,7 +294,9 @@ function App() {
   const resetGameState = (loadTodaysPuzzle?: boolean) => {
     if (loadTodaysPuzzle) {
       localStorage.setItem(PUZZLE_TYPE_KEY, PuzzleType.TODAY);
-      const todaysGameState = gameStateManager.loadGameState(TODAYS_GAME_STATE_KEY);
+      const todaysGameState = gameStateManager.loadGameState(
+        TODAYS_GAME_STATE_KEY
+      );
       if (todaysGameState.puzzleNumber === todaysPuzzle) {
         // If Today's puzzle is the same as the stored, load it
         loadGameState(gameStateManager.loadGameState(TODAYS_GAME_STATE_KEY));
@@ -258,7 +315,8 @@ function App() {
    * Determine the keyboard type from local storage
    */
   const determineKeyboard = () => {
-    const storedKeyboard = (localStorage.getItem(KEYBOARD_STORAGE_KEY) || "") as KeyboardState;
+    const storedKeyboard = (localStorage.getItem(KEYBOARD_STORAGE_KEY) ||
+      "") as KeyboardState;
     if (Object.values(KeyboardState).includes(storedKeyboard)) {
       setKeyboardDisplay(storedKeyboard);
       return storedKeyboard;
@@ -273,7 +331,8 @@ function App() {
    * Determine the difficulty from local storage
    */
   const determineDifficulty = () => {
-    const storedDifficulty = (localStorage.getItem(DIFFICULTY_KEY) || "") as DifficultyOptions;
+    const storedDifficulty = (localStorage.getItem(DIFFICULTY_KEY) ||
+      "") as DifficultyOptions;
     if (Object.values(DifficultyOptions).includes(storedDifficulty)) {
       setDifficulty(localStorage.difficulty);
       return storedDifficulty;
@@ -289,7 +348,9 @@ function App() {
    * @returns PuzzleType
    */
   const determinePuzzleType = () => {
-    const storedPuzzleType: PuzzleType = (localStorage.getItem(PUZZLE_TYPE_KEY) || "") as PuzzleType;
+    const storedPuzzleType: PuzzleType = (localStorage.getItem(
+      PUZZLE_TYPE_KEY
+    ) || "") as PuzzleType;
     if (Object.values(PuzzleType).includes(storedPuzzleType)) {
       setPuzzleType(storedPuzzleType);
       return storedPuzzleType;
@@ -305,12 +366,18 @@ function App() {
    * @param letter
    */
   const onSelect = (letter: string) => {
-    const isLetterDisabled = difficulty === DifficultyOptions.HARDER && letterOptions.find((l) => l.letter === letter)?.disabled;
+    const isLetterDisabled =
+      difficulty === DifficultyOptions.HARDER &&
+      letterOptions.find((l) => l.letter === letter)?.disabled;
     const spaceIsBlank = guessMap[mapPointer[0]].some((e) => e.letter === "");
     if (isLetterDisabled) {
       setShowError(true);
       setErrorMessage(`${letter} is disabled!`);
-    } else if (!(showFail || showSuccess) && spaceIsBlank && !isLetterDisabled) {
+    } else if (
+      !(showFail || showSuccess) &&
+      spaceIsBlank &&
+      !isLetterDisabled
+    ) {
       guessMap[mapPointer[0]][mapPointer[1]] = {
         ...DefaultLetter,
         letter: letter,
@@ -324,7 +391,10 @@ function App() {
    * Remove the last letter from a guess
    */
   const onBackspace = () => {
-    if (!disableBackspace && guessMap[mapPointer[0]].some((e) => e.letter !== "")) {
+    if (
+      !disableBackspace &&
+      guessMap[mapPointer[0]].some((e) => e.letter !== "")
+    ) {
       guessMap[mapPointer[0]][mapPointer[1] - 1] = DefaultLetter;
       setMapPointer([mapPointer[0], mapPointer[1] - 1]);
     }
@@ -336,24 +406,49 @@ function App() {
    */
   const onSubmit = () => {
     if (!disableSubmit) {
-      const guessedWord = guessMap[mapPointer[0]].map((letter) => letter.letter).join("");
-      const hintedLetters = letterOptions.filter((letter) => letter.containMatch || letter.positionMatch);
-      const guessContainsAllHints = hintedLetters.every((letter) => guessedWord.includes(letter.letter));
-      if ((difficulty === DifficultyOptions.HARD || difficulty === DifficultyOptions.HARDER) && !guessContainsAllHints) {
+      const guessedWord = guessMap[mapPointer[0]]
+        .map((letter) => letter.letter)
+        .join("");
+      const hintedLetters = letterOptions.filter(
+        (letter) => letter.containMatch || letter.positionMatch
+      );
+      const guessContainsAllHints = hintedLetters.every((letter) =>
+        guessedWord.includes(letter.letter)
+      );
+      if (
+        (difficulty === DifficultyOptions.HARD ||
+          difficulty === DifficultyOptions.HARDER) &&
+        !guessContainsAllHints
+      ) {
         // In harder difficulty, make sure the guess contains all hints
         toast.warn(`Must include all previous hints!`);
-      } else if (guessWords.includes(guessedWord.toLocaleLowerCase()) || validWords.includes(guessedWord.toLocaleLowerCase())) {
+      } else if (
+        guessWords.includes(guessedWord.toLocaleLowerCase()) ||
+        validWords.includes(guessedWord.toLocaleLowerCase())
+      ) {
         // Ensure the word is contained within all the possible words
         if (utilities.previousGuess(guessedWord, guessMap, mapPointer)) {
           // Check if word has already been tried
-          toast.warn(`You already tried ${difficulty === DifficultyOptions.EMOJI ? utilities.generateEmojiString(guessedWord) : guessedWord}.`);
+          toast.warn(
+            `You already tried ${
+              difficulty === DifficultyOptions.EMOJI
+                ? utilities.generateEmojiString(guessedWord)
+                : guessedWord
+            }.`
+          );
         } else {
           validateWord(guessedWord);
         }
       } else {
         // Not a valid word
         gameLogManager.updateInvalidWordCount();
-        toast.warn(`${difficulty === DifficultyOptions.EMOJI ? utilities.generateEmojiString(guessedWord) : guessedWord} is not a word!`);
+        toast.warn(
+          `${
+            difficulty === DifficultyOptions.EMOJI
+              ? utilities.generateEmojiString(guessedWord)
+              : guessedWord
+          } is not a word!`
+        );
       }
     }
   };
@@ -372,7 +467,10 @@ function App() {
     // Loop over array of letter from the guessed word
     guess.split("").forEach((letter, index) => {
       // Search method for finding keyboard letter to be updated
-      const keyboardLetter = letterOptions.find((letterOption: LetterState) => letterOption.letter === letter) ?? DefaultLetter;
+      const keyboardLetter =
+        letterOptions.find(
+          (letterOption: LetterState) => letterOption.letter === letter
+        ) ?? DefaultLetter;
 
       const guessMapLetter = guessMapRow[index];
 
@@ -406,13 +504,26 @@ function App() {
       const guessOccurenceCount = guess.match(dupeLetterMatch)?.length ?? 0; // count occurances of letter in guess word, 0 if none
       const goalOccurenceCount = solution.match(dupeLetterMatch)?.length ?? 0; // count occurances of letter in goal word, 0 if none
       // If the guess contains more occurances than the goal and it's not the first time the letter was guessed, remove hint
-      if (guessOccurenceCount > goalOccurenceCount && guess.indexOf(letter) < index) {
+      if (
+        guessOccurenceCount > goalOccurenceCount &&
+        guess.indexOf(letter) < index
+      ) {
         guessMapRow
-          .filter((guessLetter, filterIndex) => letter === guessLetter.letter && filterIndex < index) // retrieve previous duplicate letters
+          .filter(
+            (guessLetter, filterIndex) =>
+              letter === guessLetter.letter && filterIndex < index
+          ) // retrieve previous duplicate letters
           .forEach((guessLetter) => (guessLetter.containMatch = false)); // disable their hint
       }
       // If the guess already has a position match, hide hints for duplicate letter after
-      if (guessOccurenceCount > goalOccurenceCount && guess.indexOf(letter) < index && guessMapRow.some((guessLetter) => letter === guessLetter.letter && guessLetter.positionMatch)) {
+      if (
+        guessOccurenceCount > goalOccurenceCount &&
+        guess.indexOf(letter) < index &&
+        guessMapRow.some(
+          (guessLetter) =>
+            letter === guessLetter.letter && guessLetter.positionMatch
+        )
+      ) {
         guessMapLetter.containMatch = false;
       }
     });
@@ -475,7 +586,11 @@ function App() {
   };
 
   // Handle keyboard input
-  useHotkeys(alphabet.join(", "), (key) => onSelect(key.key.toLocaleUpperCase()), [onSelect]);
+  useHotkeys(
+    alphabet.join(", "),
+    (key) => onSelect(key.key.toLocaleUpperCase()),
+    [onSelect]
+  );
   useHotkeys("backspace", () => onBackspace(), [onBackspace]);
   useHotkeys("enter", () => onSubmit(), [onSubmit]);
 
@@ -555,7 +670,12 @@ function App() {
       <div className="flex flex-col w-full h-full max-w-4xl mx-auto py-2 px-2 sm:px-4">
         <div className="flex flex-initial flex-row flex-wrap justify-between items-end border-b-2 border-slate-300 dark:border-slate-500 pb-4 space-y-2">
           <h1 className="text-lg md:text-4xl font-bold flex flex-row items-center">
-            <img src={logo} alt="Word Guess" title="Word Guess" className="w-6 h-6 sm:w-8 sm:h-8 mx-2 sm:ml-0 sm:mt-1" />
+            <img
+              src={logo}
+              alt="Word Guess"
+              title="Word Guess"
+              className="w-6 h-6 sm:w-8 sm:h-8 mx-2 sm:ml-0 sm:mt-1"
+            />
             Word Guess
           </h1>
           <ul className="list-none flex flex-row space-x-4">
@@ -570,7 +690,10 @@ function App() {
               </button>
             </li>
             <li>
-              <button title="Settings" onClick={() => setOpenSettingsModal(true)}>
+              <button
+                title="Settings"
+                onClick={() => setOpenSettingsModal(true)}
+              >
                 <CogIcon className="w-8 h-8 inline-block" />
               </button>
             </li>
@@ -594,7 +717,10 @@ function App() {
                   Try another?
                 </button>
               ) : (
-                <ConfirmationModalContextProvider confirmText="Are you sure you want a new puzzle? Your current game will be lost." confirmButtonText="New Puzzle">
+                <ConfirmationModalContextProvider
+                  confirmText="Are you sure you want a new puzzle? Your current game will be lost."
+                  confirmButtonText="New Puzzle"
+                >
                   <ButtonWithConfirmation
                     className="button-outline"
                     onClick={() => {
@@ -612,7 +738,10 @@ function App() {
               )}
               {todaysPuzzle !== puzzleNumber && (
                 <>
-                  <ConfirmationModalContextProvider confirmText="Are you sure you want load Today's Puzzle? Your current game will be lost." confirmButtonText="Go To Today's Puzzle">
+                  <ConfirmationModalContextProvider
+                    confirmText="Are you sure you want load Today's Puzzle? Your current game will be lost."
+                    confirmButtonText="Go To Today's Puzzle"
+                  >
                     <ButtonWithConfirmation
                       className="button-positive"
                       onClick={() => {
@@ -625,12 +754,17 @@ function App() {
                       }}
                       disabled={todaysPuzzle === puzzleNumber}
                     >
-                      Today's Puzzle
+                      {"Today's Puzzle"}
                     </ButtonWithConfirmation>
                   </ConfirmationModalContextProvider>
-                  <ConfirmationModalContextProvider confirmText="Are you sure you want to reveal the solution?" confirmButtonText="Reveal">
+                  <ConfirmationModalContextProvider
+                    confirmText="Are you sure you want to reveal the solution?"
+                    confirmButtonText="Reveal"
+                  >
                     <ButtonWithConfirmation
-                      disabled={showSuccess || showFail || todaysPuzzle === puzzleNumber}
+                      disabled={
+                        showSuccess || showFail || todaysPuzzle === puzzleNumber
+                      }
                       className="button-outline"
                       onClick={() => {
                         if (!showFail) {
@@ -652,7 +786,10 @@ function App() {
             </div>
             <div className="hidden md:flex flex-initial flex-row flex-wrap justify-center items-center space-x-2">
               <strong>Difficulty:</strong>{" "}
-              <button className="button-outline capitalize" onClick={() => setOpenSettingsModal(true)}>
+              <button
+                className="button-outline capitalize"
+                onClick={() => setOpenSettingsModal(true)}
+              >
                 {difficulty}
               </button>
             </div>
@@ -660,7 +797,7 @@ function App() {
           <div className="flex flex-auto flex-col justify-center items-center">
             {todaysPuzzle === puzzleNumber && (
               <span className="text-lg font-bold pb-2">
-                Today's Puzzle -{" "}
+                {"Today's Puzzle - "}
                 {currentDate.toLocaleString("en-US", {
                   month: "long",
                   day: "numeric",
@@ -668,22 +805,54 @@ function App() {
                 })}
               </span>
             )}
-            {todaysPuzzle !== puzzleNumber && <span className="text-lg font-bold pb-2">Puzzle #{puzzleNumber}</span>}
-            <GuessDisplay guessMap={guessMap} mapPointer={mapPointer} showEmoji={difficulty === DifficultyOptions.EMOJI} />
+            {todaysPuzzle !== puzzleNumber && (
+              <span className="text-lg font-bold pb-2">
+                Puzzle #{puzzleNumber}
+              </span>
+            )}
+            <GuessDisplay
+              guessMap={guessMap}
+              mapPointer={mapPointer}
+              showEmoji={difficulty === DifficultyOptions.EMOJI}
+            />
           </div>
           <div className="flex flex-initial flex-col">
             {(showFail || showSuccess) && (
               <div className="flex flex-col justify-center items-center">
-                {showFail && <Toast type={ToastTypes.ERROR} message={`Sorry! The word was ${difficulty === DifficultyOptions.EMOJI ? utilities.generateEmojiString(solution) : solution}`} />}
-                {showSuccess && <Toast type={ToastTypes.SUCCESS} message={`Success! The word is ${difficulty === DifficultyOptions.EMOJI ? utilities.generateEmojiString(solution) : solution}!`} />}
+                {showFail && (
+                  <Toast
+                    type={ToastTypes.ERROR}
+                    message={`Sorry! The word was ${
+                      difficulty === DifficultyOptions.EMOJI
+                        ? utilities.generateEmojiString(solution)
+                        : solution
+                    }`}
+                  />
+                )}
+                {showSuccess && (
+                  <Toast
+                    type={ToastTypes.SUCCESS}
+                    message={`Success! The word is ${
+                      difficulty === DifficultyOptions.EMOJI
+                        ? utilities.generateEmojiString(solution)
+                        : solution
+                    }!`}
+                  />
+                )}
                 <ul className="list-none flex flex-row space-x-4">
                   <li>
-                    <button className="underline" onClick={() => setOpenShareModal(true)}>
+                    <button
+                      className="underline"
+                      onClick={() => setOpenShareModal(true)}
+                    >
                       Share Results
                     </button>
                   </li>
                   <li>
-                    <button className="underline" onClick={() => setOpenStatsModal(true)}>
+                    <button
+                      className="underline"
+                      onClick={() => setOpenStatsModal(true)}
+                    >
                       View Your Stats
                     </button>
                   </li>
@@ -705,13 +874,31 @@ function App() {
                 </ul>
               </div>
             )}
-            <ToastContainer position="top-center" transition={Slide} limit={1} autoClose={3000} hideProgressBar newestOnTop={false} closeOnClick rtl={false} pauseOnHover pauseOnFocusLoss draggable theme="colored" closeButton={false}></ToastContainer>
+            <ToastContainer
+              position="top-center"
+              transition={Slide}
+              limit={1}
+              autoClose={3000}
+              hideProgressBar
+              newestOnTop={false}
+              closeOnClick
+              rtl={false}
+              pauseOnHover
+              pauseOnFocusLoss
+              draggable
+              theme="colored"
+              closeButton={false}
+            ></ToastContainer>
             <Keyboard
               qwerty={keyboardDisplay === KeyboardState.QWERTY}
               showEmoji={difficulty === DifficultyOptions.EMOJI}
               letterOptions={letterOptions}
               onSelect={onSelect}
-              disableSelect={(letter) => (letter.disabled && difficulty === DifficultyOptions.HARDER) || showSuccess || showFail}
+              disableSelect={(letter) =>
+                (letter.disabled && difficulty === DifficultyOptions.HARDER) ||
+                showSuccess ||
+                showFail
+              }
               onSubmit={onSubmit}
               disableSubmit={disableSubmit}
               onBackspace={onBackspace}
@@ -724,27 +911,43 @@ function App() {
             <a href="https://alexmj212.dev" className="underline">
               alexmj212.dev
             </a>
-            <a href="https://alexmj212.dev/blog/understanding-how-wordle-works/" className="underline">
+            <a
+              href="https://alexmj212.dev/blog/understanding-how-wordle-works/"
+              className="underline"
+            >
               How Word Guess Works
             </a>
           </div>
           <div className="flex flex-auto flex-row space-x-4 justify-start md:justify-end items-end">
             {todaysPuzzle !== puzzleNumber && <span>#{puzzleNumber}</span>}
-            <span>Build: {document.querySelector('meta[name="build-version"]')?.getAttribute("build-version")}</span>
-            <a href="https://www.github.com/alexmj212/word-guess" className="underline">
+            <span>
+              Build:{" "}
+              {document
+                .querySelector('meta[name="build-version"]')
+                ?.getAttribute("build-version")}
+            </span>
+            <a
+              href="https://www.github.com/alexmj212/word-guess"
+              className="underline"
+            >
               Source
             </a>
           </div>
         </div>
       </div>
-      <Modal open={openRulesModal} setOpen={setOpenRulesModal} title="Guess the Hidden Word!">
+      <Modal
+        open={openRulesModal}
+        setOpen={setOpenRulesModal}
+        title="Guess the Hidden Word!"
+      >
         <div className="flex flex-col">
           <ul className="list-disc list-inside">
             <li>The hidden word is 5 letters.</li>
             <li>Select or type letters to spell a word.</li>
-            <li>Use "Enter" to see if you are correct.</li>
+            <li>{'Use "Enter" to see if you are correct.'}</li>
             <li>
-              Use <BackspaceIcon className="h-6 w-6 inline-block" /> to remove letters from your guess.
+              Use <BackspaceIcon className="h-6 w-6 inline-block" /> to remove
+              letters from your guess.
             </li>
             <li>You will gets hints if your letters are in the hidden word.</li>
             <li>You have 6 tries to guess the word.</li>
@@ -766,11 +969,21 @@ function App() {
           </div>
         </div>
       </Modal>
-      <Modal open={openStatsModal} setOpen={setOpenStatsModal} title="Word Guess Statistics">
+      <Modal
+        open={openStatsModal}
+        setOpen={setOpenStatsModal}
+        title="Word Guess Statistics"
+      >
         <StatBlock gameLog={gameLogManager.gameLog} />
         <div className="flex flex-auto flex-row justify-center mt-4">
-          <ConfirmationModalContextProvider confirmText="Are you sure you want to reset your statistics? Your current game will be lost." confirmButtonText="Reset">
-            <ButtonWithConfirmation className="button-negative" onClick={handleStatisticsReset}>
+          <ConfirmationModalContextProvider
+            confirmText="Are you sure you want to reset your statistics? Your current game will be lost."
+            confirmButtonText="Reset"
+          >
+            <ButtonWithConfirmation
+              className="button-negative"
+              onClick={handleStatisticsReset}
+            >
               Reset Statistics
             </ButtonWithConfirmation>
           </ConfirmationModalContextProvider>
@@ -781,22 +994,44 @@ function App() {
         setOpen={setOpenShareModal}
         title={
           showSuccess
-            ? `Success! The word is ${difficulty === DifficultyOptions.EMOJI ? utilities.generateEmojiString(solution) : solution}`
-            : `Sorry! The word was ${difficulty === DifficultyOptions.EMOJI ? utilities.generateEmojiString(solution) : solution}`
+            ? `Success! The word is ${
+                difficulty === DifficultyOptions.EMOJI
+                  ? utilities.generateEmojiString(solution)
+                  : solution
+              }`
+            : `Sorry! The word was ${
+                difficulty === DifficultyOptions.EMOJI
+                  ? utilities.generateEmojiString(solution)
+                  : solution
+              }`
         }
       >
         <div className="flex flex-col justify-center mb-4">
-          <pre className="bg-slate-200 dark:bg-slate-800 px-4 py-2 rounded-md">{utilities.generateShareText(guessMap, puzzleNumber, showFail)}</pre>
+          <pre className="bg-slate-200 dark:bg-slate-800 px-4 py-2 rounded-md">
+            {utilities.generateShareText(guessMap, puzzleNumber, showFail)}
+          </pre>
         </div>
         <StatBlock gameLog={gameLogManager.gameLog} />
       </Modal>
-      <Modal open={openSettingsModal} setOpen={setOpenSettingsModal} title="Settings">
+      <Modal
+        open={openSettingsModal}
+        setOpen={setOpenSettingsModal}
+        title="Settings"
+      >
         <dl>
           <div className="grid-row">
             <dt className="grid-label">Difficulty</dt>
             <dd className="grid-field">
-              <ConfirmationModalContextProvider confirmText="Are you sure you want to change the difficulty? Your current game will be lost." confirmButtonText="Reset">
-                <RadioWithConfirmation keys={Object.values(DifficultyOptions)} selectedValue={difficulty} keyDescription={difficultyDescriptions} onChange={handleDifficultyChange}></RadioWithConfirmation>
+              <ConfirmationModalContextProvider
+                confirmText="Are you sure you want to change the difficulty? Your current game will be lost."
+                confirmButtonText="Reset"
+              >
+                <RadioWithConfirmation
+                  keys={Object.values(DifficultyOptions)}
+                  selectedValue={difficulty}
+                  keyDescription={difficultyDescriptions}
+                  onChange={handleDifficultyChange}
+                ></RadioWithConfirmation>
               </ConfirmationModalContextProvider>
             </dd>
           </div>
@@ -808,7 +1043,11 @@ function App() {
                   <RadioGroup.Option key={themeOption} value={themeOption}>
                     {({ checked }) => (
                       <div className="check-group">
-                        <div className={`check-radio ${checked ? "bg-blue-400" : "bg-white"}`}></div>
+                        <div
+                          className={`check-radio ${
+                            checked ? "bg-blue-400" : "bg-white"
+                          }`}
+                        ></div>
                         <span className="check-label">{themeOption}</span>
                       </div>
                     )}
@@ -820,12 +1059,19 @@ function App() {
           <div className="grid-row">
             <dt className="grid-label">Keyboard Display</dt>
             <dd className="grid-field">
-              <RadioGroup value={keyboardDisplay} onChange={handleKeyboardSwitch}>
+              <RadioGroup
+                value={keyboardDisplay}
+                onChange={handleKeyboardSwitch}
+              >
                 {Object.values(KeyboardState).map((keyboard) => (
                   <RadioGroup.Option key={keyboard} value={keyboard}>
                     {({ checked }) => (
                       <div className="check-group">
-                        <div className={`check-radio ${checked ? "bg-blue-400" : "bg-white"}`}></div>
+                        <div
+                          className={`check-radio ${
+                            checked ? "bg-blue-400" : "bg-white"
+                          }`}
+                        ></div>
                         <span className="check-label">{keyboard}</span>
                       </div>
                     )}

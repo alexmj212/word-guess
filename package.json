@@ -24,10 +24,13 @@
   },
   "scripts": {
     "start": "export REACT_APP_VERSION=$(git rev-parse --short=7 HEAD) && react-scripts start",
+    "lint": "npx eslint ./src",
+    "lint:fix": "npx eslint --fix ./src",
     "build": "react-scripts build && npm run build-number",
     "build-number": "export REACT_APP_VERSION=$(git rev-parse --short=7 HEAD) && sed -i -- 's/%REACT_APP_VERSION%/'$REACT_APP_VERSION'/g' build/index.html",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "prepare": "husky install"
   },
   "eslintConfig": {
     "extends": [
@@ -48,8 +51,20 @@
     ]
   },
   "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^5.12.0",
+    "@typescript-eslint/parser": "^5.12.0",
     "autoprefixer": "^10.4.2",
+    "eslint": "^8.9.0",
+    "eslint-config-prettier": "^8.4.0",
+    "eslint-plugin-react": "^7.28.0",
+    "eslint-plugin-react-hooks": "^4.3.0",
+    "husky": "^7.0.4",
+    "lint-staged": "^12.3.4",
     "postcss": "^8.4.5",
+    "prettier": "2.5.1",
     "tailwindcss": "^3.0.13"
+  },
+  "lint-staged": {
+    "**/*": "prettier --write --ignore-unknown"
   }
 }

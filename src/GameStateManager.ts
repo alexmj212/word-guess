@@ -10,8 +10,10 @@ export enum DifficultyOptions {
 
 export const difficultyDescriptions: { [key in DifficultyOptions]: string } = {
   [DifficultyOptions.NORMAL]: "Standard Wordle Rules",
-  [DifficultyOptions.HARD]: "Any revealed hints must be used in subsequent guesses.",
-  [DifficultyOptions.HARDER]: "Any revealed hints must be used in subsequent guesses. You can't reuse letters that aren't in the solution.",
+  [DifficultyOptions.HARD]:
+    "Any revealed hints must be used in subsequent guesses.",
+  [DifficultyOptions.HARDER]:
+    "Any revealed hints must be used in subsequent guesses. You can't reuse letters that aren't in the solution.",
   [DifficultyOptions.EMOJI]: "Oops All Emojis!",
 };
 
@@ -39,7 +41,13 @@ export const DefaultLetter: LetterState = {
  * Create map of empty guess rows
  */
 const DefaultGuessMap = [...Array(6).keys()].map(() => {
-  return [DefaultLetter, DefaultLetter, DefaultLetter, DefaultLetter, DefaultLetter];
+  return [
+    DefaultLetter,
+    DefaultLetter,
+    DefaultLetter,
+    DefaultLetter,
+    DefaultLetter,
+  ];
 });
 
 const DefaultLetterOptions = alphabet.map((letter) => {
@@ -98,7 +106,10 @@ export class GameStateManager {
   }
 
   private _commitGameState(key: string) {
-    localStorage.setItem(key, JSON.stringify({ ...this.gameState, lastUpdated: Date.now() }));
+    localStorage.setItem(
+      key,
+      JSON.stringify({ ...this.gameState, lastUpdated: Date.now() })
+    );
   }
 
   public generateNewGameState(): GameState {

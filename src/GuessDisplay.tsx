@@ -1,4 +1,3 @@
-import React from "react";
 import { LetterState } from "./App";
 import utilities from "./util";
 
@@ -10,12 +9,18 @@ type GuessDisplayType = {
 
 const cursorDisplay = " ";
 
-const GuessDisplay: React.FC<GuessDisplayType> = ({ guessMap, mapPointer, showEmoji }) => {
+const GuessDisplay = ({
+  guessMap,
+  mapPointer,
+  showEmoji,
+}: GuessDisplayType) => {
   const cursor = (row: number, index: number, letter: LetterState): string => {
     if (row === mapPointer[0] && index === mapPointer[1] && !letter.letter) {
-      return cursorDisplay
+      return cursorDisplay;
     } else {
-      return showEmoji ? utilities.generateEmojiString(letter.letter) : letter.letter;
+      return showEmoji
+        ? utilities.generateEmojiString(letter.letter)
+        : letter.letter;
     }
   };
 
@@ -33,10 +38,27 @@ const GuessDisplay: React.FC<GuessDisplayType> = ({ guessMap, mapPointer, showEm
       {guessMap.map((guessRow, row) => (
         <div key={row} className="flex flex-row justify-center">
           {guessRow.map((letter: LetterState, index) => (
-            <div key={row + index} className={`flip-card ${row < mapPointer[0] && "flipped"} guess-box`}>
+            <div
+              key={row + index}
+              className={`flip-card ${
+                row < mapPointer[0] && "flipped"
+              } guess-box`}
+            >
               <div className={`flip-card-inner ${delays[index]}`}>
-                <div className={`flip-card-front`}>{cursor(row, index, letter)}</div>
-                <div className={`flip-card-back ${row < mapPointer[0] && !letter.containMatch && !letter.positionMatch ? "no-match" : ""} ${utilities.determineLetterClass(letter)} `}>{cursor(row, index, letter)}</div>
+                <div className={`flip-card-front`}>
+                  {cursor(row, index, letter)}
+                </div>
+                <div
+                  className={`flip-card-back ${
+                    row < mapPointer[0] &&
+                    !letter.containMatch &&
+                    !letter.positionMatch
+                      ? "no-match"
+                      : ""
+                  } ${utilities.determineLetterClass(letter)} `}
+                >
+                  {cursor(row, index, letter)}
+                </div>
               </div>
             </div>
           ))}

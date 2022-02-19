@@ -3,7 +3,11 @@ import { alphabet, emojiAlphabet } from "./wordList";
 
 const utilities = {
   determineLetterClass: (letterState: LetterState) => {
-    if (letterState.noMatch && !letterState.positionMatch && !letterState.containMatch) {
+    if (
+      letterState.noMatch &&
+      !letterState.positionMatch &&
+      !letterState.containMatch
+    ) {
       return "no-match";
     } else if (letterState.containMatch && !letterState.positionMatch) {
       return "contain-match";
@@ -13,8 +17,14 @@ const utilities = {
       return "";
     }
   },
-  generateShareText: (guessArray: LetterState[][], puzzleNumber: number, fail = false): string => {
-    const rows = guessArray.filter((row) => !row.every((letter) => letter.letter === ""));
+  generateShareText: (
+    guessArray: LetterState[][],
+    puzzleNumber: number,
+    fail = false
+  ): string => {
+    const rows = guessArray.filter(
+      (row) => !row.every((letter) => letter.letter === "")
+    );
     let shareText = `Word Guess `;
     shareText += `${puzzleNumber} `;
     shareText += `${fail ? "X" : rows.length}/6`;
@@ -35,8 +45,14 @@ const utilities = {
 
     return shareText;
   },
-  previousGuess: (guess: string, guessArray: LetterState[][], mapPointer: number[]): boolean => {
-    return guessArray.slice(0, mapPointer[0]).some((row) => row.map((letter) => letter.letter).join("") === guess);
+  previousGuess: (
+    guess: string,
+    guessArray: LetterState[][],
+    mapPointer: number[]
+  ): boolean => {
+    return guessArray
+      .slice(0, mapPointer[0])
+      .some((row) => row.map((letter) => letter.letter).join("") === guess);
   },
   generateEmojiString: (word: string): string => {
     return word

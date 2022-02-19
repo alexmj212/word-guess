@@ -1,5 +1,6 @@
 import { BackspaceIcon } from "@heroicons/react/outline";
-import React, { useEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
+import * as React from "react";
 import { LetterState } from "./App";
 import utilities from "./util";
 import { alphabet, emojiAlphabet, qwertyKeyboard } from "./wordList";
@@ -16,12 +17,27 @@ type KeyboardType = {
   disableBackspace: boolean;
 };
 
-const Keyboard: React.FC<KeyboardType> = ({ letterOptions, qwerty, showEmoji, onSelect, disableSelect, onSubmit, disableSubmit, onBackspace, disableBackspace }) => {
+const Keyboard = ({
+  letterOptions,
+  qwerty,
+  showEmoji,
+  onSelect,
+  disableSelect,
+  onSubmit,
+  disableSubmit,
+  onBackspace,
+  disableBackspace,
+}: KeyboardType) => {
   const enterRef = useRef<HTMLDivElement>(null);
 
-  qwerty ? 
-    letterOptions.sort((a, b) => qwertyKeyboard.indexOf(a.letter) - qwertyKeyboard.indexOf(b.letter)) 
-    : letterOptions.sort((a, b) => alphabet.indexOf(a.letter) - alphabet.indexOf(b.letter));
+  qwerty
+    ? letterOptions.sort(
+        (a, b) =>
+          qwertyKeyboard.indexOf(a.letter) - qwertyKeyboard.indexOf(b.letter)
+      )
+    : letterOptions.sort(
+        (a, b) => alphabet.indexOf(a.letter) - alphabet.indexOf(b.letter)
+      );
 
   useEffect(() => {
     if (enterRef.current) {
@@ -31,12 +47,29 @@ const Keyboard: React.FC<KeyboardType> = ({ letterOptions, qwerty, showEmoji, on
 
   return (
     <>
-      <div ref={enterRef} className="flex flex-col justify-center w-full mx-auto">
+      <div
+        ref={enterRef}
+        className="flex flex-col justify-center w-full mx-auto"
+      >
         <div className="flex flex-row justify-center">
           {letterOptions.slice(0, 10).map((letter) => (
             <React.Fragment key={letter.letter}>
-              <button onClick={() => onSelect(letter.letter)} value={letter.letter} title={showEmoji ? emojiAlphabet[alphabet.indexOf(letter.letter)] : letter.letter} className={`button letter-option qwerty-option ${utilities.determineLetterClass(letter)}`} disabled={disableSelect(letter)}>
-                {showEmoji ? emojiAlphabet[alphabet.indexOf(letter.letter)] : letter.letter}
+              <button
+                onClick={() => onSelect(letter.letter)}
+                value={letter.letter}
+                title={
+                  showEmoji
+                    ? emojiAlphabet[alphabet.indexOf(letter.letter)]
+                    : letter.letter
+                }
+                className={`button letter-option qwerty-option ${utilities.determineLetterClass(
+                  letter
+                )}`}
+                disabled={disableSelect(letter)}
+              >
+                {showEmoji
+                  ? emojiAlphabet[alphabet.indexOf(letter.letter)]
+                  : letter.letter}
               </button>
             </React.Fragment>
           ))}
@@ -45,25 +78,63 @@ const Keyboard: React.FC<KeyboardType> = ({ letterOptions, qwerty, showEmoji, on
           {" "}
           {letterOptions.slice(10, 19).map((letter) => (
             <React.Fragment key={letter.letter}>
-              <button onClick={() => onSelect(letter.letter)} value={letter.letter} title={showEmoji ? emojiAlphabet[alphabet.indexOf(letter.letter)] : letter.letter} className={`button letter-option qwerty-option ${utilities.determineLetterClass(letter)}`} disabled={disableSelect(letter)}>
-                {showEmoji ? emojiAlphabet[alphabet.indexOf(letter.letter)] : letter.letter}
+              <button
+                onClick={() => onSelect(letter.letter)}
+                value={letter.letter}
+                title={
+                  showEmoji
+                    ? emojiAlphabet[alphabet.indexOf(letter.letter)]
+                    : letter.letter
+                }
+                className={`button letter-option qwerty-option ${utilities.determineLetterClass(
+                  letter
+                )}`}
+                disabled={disableSelect(letter)}
+              >
+                {showEmoji
+                  ? emojiAlphabet[alphabet.indexOf(letter.letter)]
+                  : letter.letter}
               </button>
             </React.Fragment>
           ))}
         </div>
         <div className="flex flex-row justify-center">
           {" "}
-          <button title="Backspace" className="keyboard-action bg-red-400 dark:bg-red-700" onClick={onBackspace} disabled={disableBackspace}>
+          <button
+            title="Backspace"
+            className="keyboard-action bg-red-400 dark:bg-red-700"
+            onClick={onBackspace}
+            disabled={disableBackspace}
+          >
             <BackspaceIcon className="h-10 w-10" />
           </button>
           {letterOptions.slice(19, letterOptions.length).map((letter) => (
             <React.Fragment key={letter.letter}>
-              <button onClick={() => onSelect(letter.letter)} value={letter.letter} title={showEmoji ? emojiAlphabet[alphabet.indexOf(letter.letter)] : letter.letter} className={`button letter-option qwerty-option ${utilities.determineLetterClass(letter)}`} disabled={disableSelect(letter)}>
-                {showEmoji ? emojiAlphabet[alphabet.indexOf(letter.letter)] : letter.letter}
+              <button
+                onClick={() => onSelect(letter.letter)}
+                value={letter.letter}
+                title={
+                  showEmoji
+                    ? emojiAlphabet[alphabet.indexOf(letter.letter)]
+                    : letter.letter
+                }
+                className={`button letter-option qwerty-option ${utilities.determineLetterClass(
+                  letter
+                )}`}
+                disabled={disableSelect(letter)}
+              >
+                {showEmoji
+                  ? emojiAlphabet[alphabet.indexOf(letter.letter)]
+                  : letter.letter}
               </button>
             </React.Fragment>
           ))}
-          <button title="Guess Word" className={` text-xl keyboard-action bg-green-400 dark:bg-green-700`} onClick={onSubmit} disabled={disableSubmit}>
+          <button
+            title="Guess Word"
+            className={` text-xl keyboard-action bg-green-400 dark:bg-green-700`}
+            onClick={onSubmit}
+            disabled={disableSubmit}
+          >
             Enter
           </button>
         </div>

@@ -1,4 +1,5 @@
-import React, { Fragment, useRef } from "react";
+import { Fragment, useRef } from "react";
+import * as React from "react";
 import { Dialog, Transition } from "@headlessui/react";
 import { XIcon } from "@heroicons/react/outline";
 
@@ -7,9 +8,16 @@ type ModalProps = {
   open: boolean;
   setOpen: (state: boolean) => void;
   isStatic?: boolean;
+  children?: React.ReactNode;
 };
 
-const Modal: React.FC<ModalProps> = ({ title, open, setOpen, isStatic = false, children }) => {
+const Modal = ({
+  title,
+  open,
+  setOpen,
+  isStatic = false,
+  children,
+}: ModalProps) => {
   const closeRef = useRef(null);
 
   const handleClose = () => {
@@ -24,14 +32,31 @@ const Modal: React.FC<ModalProps> = ({ title, open, setOpen, isStatic = false, c
 
   return (
     <Transition.Root show={open} as={Fragment}>
-      <Dialog as="div" className="fixed z-10 inset-0 overflow-y-auto" onClose={handleClose} initialFocus={closeRef} static={isStatic}>
+      <Dialog
+        as="div"
+        className="fixed z-10 inset-0 overflow-y-auto"
+        onClose={handleClose}
+        initialFocus={closeRef}
+        static={isStatic}
+      >
         <div className="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-          <Transition.Child as={Fragment} enter="ease-out duration-300" enterFrom="opacity-0" enterTo="opacity-100" leave="ease-in duration-200" leaveFrom="opacity-100" leaveTo="opacity-0">
+          <Transition.Child
+            as={Fragment}
+            enter="ease-out duration-300"
+            enterFrom="opacity-0"
+            enterTo="opacity-100"
+            leave="ease-in duration-200"
+            leaveFrom="opacity-100"
+            leaveTo="opacity-0"
+          >
             <Dialog.Overlay className="fixed inset-0 bg-neutral-900 bg-opacity-80 transition-opacity" />
           </Transition.Child>
 
           {/* This element is to trick the browser into centering the modal contents. */}
-          <span className="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">
+          <span
+            className="hidden sm:inline-block sm:align-middle sm:h-screen"
+            aria-hidden="true"
+          >
             &#8203;
           </span>
           <Transition.Child
@@ -48,10 +73,17 @@ const Modal: React.FC<ModalProps> = ({ title, open, setOpen, isStatic = false, c
                 <div className="sm:flex sm:items-start">
                   <div className="w-full">
                     <div className="flex justify-between">
-                      <Dialog.Title as="h3" className="text-xl md:text-2xl leading-10 font-medium">
+                      <Dialog.Title
+                        as="h3"
+                        className="text-xl md:text-2xl leading-10 font-medium"
+                      >
                         {title}
                       </Dialog.Title>
-                      <button className="button-base" onClick={() => setOpen(false)} ref={closeRef}>
+                      <button
+                        className="button-base"
+                        onClick={() => setOpen(false)}
+                        ref={closeRef}
+                      >
                         <XIcon className="w-8 h-8"></XIcon>
                       </button>
                     </div>

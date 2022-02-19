@@ -3,6 +3,7 @@
 This is a shameless [Wordle](https://www.powerlanguage.co.uk/wordle/) clone.
 
 Guess the hidden word!
+
 - The hidden word is 5 letters.
 - Select or type letters to spell a word.
 - Use "Guess Word" to see if you are correct.

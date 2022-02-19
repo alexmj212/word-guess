@@ -1,11 +1,10 @@
-import React from "react";
 import { GameLog } from "./GameLogManager";
 
 type StatBlockType = {
   gameLog: GameLog;
 };
 
-const StatBlock: React.FC<StatBlockType> = ({ gameLog }) => {
+const StatBlock = ({ gameLog }: StatBlockType) => {
   return (
     <dl>
       <div className="grid-row">
@@ -26,7 +25,12 @@ const StatBlock: React.FC<StatBlockType> = ({ gameLog }) => {
       </div>
       <div className="grid-row">
         <dt className="grid-label">Win Percentage</dt>
-        <dd className="grid-field">{gameLog.gamesPlayed ? ((+gameLog.winCount / +gameLog.gamesPlayed) * 100).toFixed(2) : "0"}%</dd>
+        <dd className="grid-field">
+          {gameLog.gamesPlayed
+            ? ((+gameLog.winCount / +gameLog.gamesPlayed) * 100).toFixed(2)
+            : "0"}
+          %
+        </dd>
       </div>
       <div className="grid-row">
         <dt className="grid-label">Lost</dt>
