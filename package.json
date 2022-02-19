@@ -65,6 +65,6 @@
     "tailwindcss": "^3.0.13"
   },
   "lint-staged": {
-    "**/*": "prettier --write --ignore-unknown"
+    "**/*": "npm run lint:fix"
   }
 }
