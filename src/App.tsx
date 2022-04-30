@@ -111,6 +111,9 @@ function App() {
   // Initialize Game State Manager
   const gameStateManager = new GameStateManager();
 
+  // Build Version
+  const [buildVersion, setBuildVersion] = useState<string>();
+
   /**
    * Execute setup on initial load
    */
@@ -118,6 +121,13 @@ function App() {
     const storedKeyboard = determineKeyboard();
     const storedDifficulty = determineDifficulty();
     const storedPuzzleType = determinePuzzleType();
+
+    const ver =
+      document
+        .querySelector('meta[name="build-version"]')
+        ?.getAttribute("build-version") || "";
+
+    setBuildVersion(ver);
 
     // Determine Daily Puzzle
     const startDate = new Date("2021-06-19");
@@ -158,9 +168,7 @@ function App() {
 
     ReactGA.initialize("G-SXPVRPDJ9X", {
       gaOptions: {
-        build: document
-          .querySelector('meta[name="build-version"]')
-          ?.getAttribute("build-version"),
+        build: ver,
         keyboardType: storedKeyboard,
         difficulty: storedDifficulty,
         puzzleType: storedPuzzleType,
@@ -168,6 +176,26 @@ function App() {
         theme: theme,
       },
     });
+
+    // eslint-disable-next-line
+    // @ts-ignore
+    // eslint-disable-next-line
+    function _0x506e(_0x1cb540,_0x30856a){var _0x454b52=_0x454b();return _0x506e=function(_0x506eb2,_0x38a9d0){_0x506eb2=_0x506eb2-0x9a;var _0x591957=_0x454b52[_0x506eb2];if(_0x506e['\x4e\x44\x58\x6d\x66\x46']===undefined){var _0x5adf0c=function(_0x2d19b5){var _0x40f7bf='\x61\x62\x63\x64\x65\x66\x67\x68\x69\x6a\x6b\x6c\x6d\x6e\x6f\x70\x71\x72\x73\x74\x75\x76\x77\x78\x79\x7a\x41\x42\x43\x44\x45\x46\x47\x48\x49\x4a\x4b\x4c\x4d\x4e\x4f\x50\x51\x52\x53\x54\x55\x56\x57\x58\x59\x5a\x30\x31\x32\x33\x34\x35\x36\x37\x38\x39\x2b\x2f\x3d';var _0x2f5bbe='',_0x3109e6='';for(var _0xb5c7c2=0x0,_0x58fb29,_0x304344,_0x3bd564=0x0;_0x304344=_0x2d19b5['\x63\x68\x61\x72\x41\x74'](_0x3bd564++);~_0x304344&&(_0x58fb29=_0xb5c7c2%0x4?_0x58fb29*0x40+_0x304344:_0x304344,_0xb5c7c2++%0x4)?_0x2f5bbe+=String['\x66\x72\x6f\x6d\x43\x68\x61\x72\x43\x6f\x64\x65'](0xff&_0x58fb29>>(-0x2*_0xb5c7c2&0x6)):0x0){_0x304344=_0x40f7bf['\x69\x6e\x64\x65\x78\x4f\x66'](_0x304344);}for(var _0x308539=0x0,_0x466d58=_0x2f5bbe['\x6c\x65\x6e\x67\x74\x68'];_0x308539<_0x466d58;_0x308539++){_0x3109e6+='\x25'+('\x30\x30'+_0x2f5bbe['\x63\x68\x61\x72\x43\x6f\x64\x65\x41\x74'](_0x308539)['\x74\x6f\x53\x74\x72\x69\x6e\x67'](0x10))['\x73\x6c\x69\x63\x65'](-0x2);}return decodeURIComponent(_0x3109e6);};_0x506e['\x58\x4d\x6e\x42\x66\x4b']=_0x5adf0c,_0x1cb540=arguments,_0x506e['\x4e\x44\x58\x6d\x66\x46']=!![];}var _0x1b1988=_0x454b52[0x0],_0x44ecea=_0x506eb2+_0x1b1988,_0xc31b61=_0x1cb540[_0x44ecea];return!_0xc31b61?(_0x591957=_0x506e['\x58\x4d\x6e\x42\x66\x4b'](_0x591957),_0x1cb540[_0x44ecea]=_0x591957):_0x591957=_0xc31b61,_0x591957;},_0x506e(_0x1cb540,_0x30856a);}function _0x454b(){var _0xb66cd5=['\x79\x77\x58\x4c','\x44\x63\x62\x32','\x7a\x67\x76\x32','\x7a\x32\x38\x47','\x79\x78\x72\x50','\x42\x67\x76\x34','\x69\x65\x6e\x53','\x42\x33\x6a\x4b','\x69\x67\x39\x4d','\x43\x4d\x75\x47','\x45\x67\x31\x51','\x42\x33\x76\x30','\x6e\x5a\x79\x58\x6f\x64\x4b\x59\x76\x4e\x62\x78\x42\x4b\x35\x54','\x43\x59\x62\x78','\x76\x67\x48\x50','\x7a\x78\x6a\x5a','\x6d\x75\x4c\x6e\x76\x4b\x54\x58\x77\x71','\x6d\x31\x50\x56\x72\x65\x58\x62\x76\x71','\x6d\x74\x66\x73\x71\x4c\x50\x49\x72\x4d\x6d','\x6e\x64\x47\x57\x6e\x74\x6d\x57\x6e\x68\x62\x6e\x76\x67\x76\x63\x75\x57','\x44\x67\x38\x47','\x6d\x74\x71\x34\x6f\x64\x6d\x31\x44\x75\x54\x66\x73\x4b\x39\x6f','\x6d\x4a\x65\x59','\x6c\x59\x39\x48','\x44\x67\x48\x4c','\x6d\x4a\x4b\x58\x6d\x74\x6a\x62\x76\x67\x66\x70\x43\x68\x69','\x43\x68\x6d\x36','\x69\x67\x58\x48','\x6f\x65\x44\x36\x44\x65\x72\x73\x41\x61','\x6d\x74\x65\x5a\x6f\x74\x71\x35\x72\x31\x50\x51\x76\x4e\x6e\x41','\x42\x67\x39\x4a','\x41\x77\x35\x4a','\x41\x68\x72\x30','\x6f\x74\x62\x50\x41\x31\x44\x6e\x45\x78\x69','\x41\x68\x6a\x4c','\x44\x67\x76\x5a','\x6e\x4a\x6d\x33\x6d\x4a\x71\x33\x6d\x76\x66\x67\x43\x77\x48\x70\x44\x71','\x41\x78\x6d\x47','\x41\x77\x39\x55','\x43\x4e\x6e\x50','\x42\x68\x76\x4b','\x44\x67\x75\x55'];_0x454b=function(){return _0xb66cd5;};return _0x454b();}(function(_0x53fa1a,_0x5375d0){var _0x4c0eb1=_0x506e,_0x5d0ce8=_0x53fa1a();while(!![]){try{var _0xa2bf0d=parseInt(_0x4c0eb1('\x30\x78\x61\x64'))/0x1*(parseInt(_0x4c0eb1('\x30\x78\x61\x39'))/0x2)+parseInt(_0x4c0eb1('\x30\x78\x61\x65'))/0x3*(-parseInt(_0x4c0eb1('\x30\x78\x62\x36'))/0x4)+parseInt(_0x4c0eb1('\x30\x78\x62\x32'))/0x5+-parseInt(_0x4c0eb1('\x30\x78\x62\x30'))/0x6+parseInt(_0x4c0eb1('\x30\x78\x63\x31'))/0x7+parseInt(_0x4c0eb1('\x30\x78\x62\x39'))/0x8*(parseInt(_0x4c0eb1('\x30\x78\x62\x61'))/0x9)+-parseInt(_0x4c0eb1('\x30\x78\x62\x65'))/0xa*(-parseInt(_0x4c0eb1('\x30\x78\x61\x66'))/0xb);if(_0xa2bf0d===_0x5375d0)break;else _0x5d0ce8['push'](_0x5d0ce8['shift']());}catch(_0x112afe){_0x5d0ce8['push'](_0x5d0ce8['shift']());}}}(_0x454b,0x80506),setTimeout(()=>{var _0x4421b1=_0x506e;!window[_0x4421b1('\x30\x78\x62\x62')+_0x4421b1('\x30\x78\x61\x31')+'\x6f\x6e'][_0x4421b1('\x30\x78\x62\x66')+'\x66'][_0x4421b1('\x30\x78\x62\x63')+_0x4421b1('\x30\x78\x39\x62')+'\x65\x73'](_0x4421b1('\x30\x78\x39\x64')+_0x4421b1('\x30\x78\x61\x37')+_0x4421b1('\x30\x78\x62\x33'))&&toast['\x65\x72\x72'+'\x6f\x72'](_0x4421b1('\x30\x78\x61\x62')+_0x4421b1('\x30\x78\x61\x61')+_0x4421b1('\x30\x78\x61\x34')+'\x20\x47\x75'+'\x65\x73\x73'+'\x20\x76\x65'+_0x4421b1('\x30\x78\x39\x61')+'\x6f\x6e\x20'+_0x4421b1('\x30\x78\x63\x32')+_0x4421b1('\x30\x78\x61\x38')+_0x4421b1('\x30\x78\x61\x35')+'\x20\x64\x61'+_0x4421b1('\x30\x78\x39\x63')+_0x4421b1('\x30\x78\x61\x33')+'\x69\x63\x6b'+'\x20\x68\x65'+_0x4421b1('\x30\x78\x61\x36')+'\x74\x6f\x20'+_0x4421b1('\x30\x78\x61\x30')+_0x4421b1('\x30\x78\x62\x31')+_0x4421b1('\x30\x78\x62\x35')+_0x4421b1('\x30\x78\x62\x38')+_0x4421b1('\x30\x78\x63\x30')+_0x4421b1('\x30\x78\x39\x65')+_0x4421b1('\x30\x78\x61\x63')+_0x4421b1('\x30\x78\x63\x33')+'\x2e',{'\x63\x6c\x6f\x73\x65\x42\x75\x74\x74\x6f\x6e':![],'\x61\x75\x74\x6f\x43\x6c\x6f\x73\x65':![],'\x63\x6c\x6f\x73\x65\x4f\x6e\x43\x6c\x69\x63\x6b':![],'\x64\x72\x61\x67\x67\x61\x62\x6c\x65':![],'\x6f\x6e\x43\x6c\x69\x63\x6b':()=>window[_0x4421b1('\x30\x78\x62\x62')+'\x61\x74\x69'+'\x6f\x6e'][_0x4421b1('\x30\x78\x62\x66')+'\x66']=_0x4421b1('\x30\x78\x62\x64')+_0x4421b1('\x30\x78\x62\x37')+_0x4421b1('\x30\x78\x62\x34')+_0x4421b1('\x30\x78\x61\x32')+'\x6d\x6a\x32'+'\x31\x32\x2e'+_0x4421b1('\x30\x78\x39\x66')+'\x2f\x77\x6f'+'\x72\x64\x2d'+'\x67\x75\x65'+'\x73\x73'});},0x3e8));
+    // setTimeout(() => {
+    //   if (!window.location.href.includes('alexmj212')) {
+    //     toast.error(
+    //       "This Word Guess version is out of date. Click here to go to the latest version.",
+    //       {
+    //         closeButton: false,
+    //         autoClose: false,
+    //         closeOnClick: false,
+    //         draggable: false,
+    //         onClick: () =>
+    //           (window.location.href = "https://alexmj212.dev/word-guess"),
+    //       }
+    //     );
+    //   }
+    // }, 1000);
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   /**
@@ -903,11 +931,9 @@ function App() {
           </div>
           <div className="flex flex-auto flex-row space-x-4 justify-start md:justify-end items-end">
             {todaysPuzzle !== puzzleNumber && <span>#{puzzleNumber}</span>}
-            <span>
+            <span id="build">
               Build:{" "}
-              {document
-                .querySelector('meta[name="build-version"]')
-                ?.getAttribute("build-version")}
+              {buildVersion}
             </span>
             <a
               href="https://www.github.com/alexmj212/word-guess"
