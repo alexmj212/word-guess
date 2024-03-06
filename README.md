@@ -1,7 +1,5 @@
 # Word Guess
 
-This is a shameless [Wordle](https://www.powerlanguage.co.uk/wordle/) clone.
-
 Guess the hidden word!
 
 - The hidden word is 5 letters.
