@@ -9,7 +9,7 @@ export enum DifficultyOptions {
 }
 
 export const difficultyDescriptions: { [key in DifficultyOptions]: string } = {
-  [DifficultyOptions.NORMAL]: "Standard Wordle Rules",
+  [DifficultyOptions.NORMAL]: "Standard Rules",
   [DifficultyOptions.HARD]:
     "Any revealed hints must be used in subsequent guesses.",
   [DifficultyOptions.HARDER]:
