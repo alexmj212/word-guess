@@ -1,0 +1,12 @@
+{
+  "files": {
+    "main.css": "/word-guess/static/css/main.ba50abb0.css",
+    "main.js": "/word-guess/static/js/main.e589eb37.js",
+    "static/js/27.81e959df.chunk.js": "/word-guess/static/js/27.81e959df.chunk.js",
+    "index.html": "/word-guess/index.html"
+  },
+  "entrypoints": [
+    "static/css/main.ba50abb0.css",
+    "static/js/main.e589eb37.js"
+  ]
+}
