@@ -1,8 +1,14 @@
 import { render, screen } from "@testing-library/react";
 import App from "./App";
 
-test("renders learn react link", () => {
-  render(<App />);
-  const linkElement = screen.getByText(/learn react/i);
-  expect(linkElement).toBeInTheDocument();
+// ---------------------------------------------------------------------------
+// Smoke test — App renders without crashing
+// ---------------------------------------------------------------------------
+
+describe("App — smoke test", () => {
+  it("renders the Word Guess header without crashing", () => {
+    render(<App />);
+    // The h1 contains "Word Guess" as text (alongside the logo img)
+    expect(screen.getByRole("heading", { name: /word guess/i })).toBeInTheDocument();
+  });
 });
