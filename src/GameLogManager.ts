@@ -41,8 +41,11 @@ const DefaultGameLog: GameLog = {
 
 const GAME_LOG_KEY = "word-guess-log";
 
+const cloneDefaultGameLog = (): GameLog =>
+  JSON.parse(JSON.stringify(DefaultGameLog));
+
 export class GameLogManager {
-  public gameLog = DefaultGameLog;
+  public gameLog: GameLog = cloneDefaultGameLog();
 
   constructor() {
     this._initializeLog();
@@ -52,18 +55,19 @@ export class GameLogManager {
     this.gameLog = this._getGameLog();
   }
 
-  private _getGameLog() {
+  private _getGameLog(): GameLog {
     try {
       const potentialGameLog = localStorage.getItem(GAME_LOG_KEY);
       if (potentialGameLog) {
         return JSON.parse(potentialGameLog);
       } else {
-        this.gameLog = DefaultGameLog;
+        this.gameLog = cloneDefaultGameLog();
         this._saveGameLog();
-        return DefaultGameLog;
+        return this.gameLog;
       }
     } catch {
       console.error("Error Parsing Game Log");
+      return cloneDefaultGameLog();
     }
   }
 
@@ -113,7 +117,7 @@ export class GameLogManager {
   }
 
   public resetGameLog() {
-    this.gameLog = DefaultGameLog;
+    this.gameLog = cloneDefaultGameLog();
     this._saveGameLog();
   }
 }

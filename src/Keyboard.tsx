@@ -30,12 +30,12 @@ const Keyboard = ({
 }: KeyboardType) => {
   const enterRef = useRef<HTMLDivElement>(null);
 
-  qwerty
-    ? letterOptions.sort(
+  const sortedOptions = qwerty
+    ? [...letterOptions].sort(
         (a, b) =>
           qwertyKeyboard.indexOf(a.letter) - qwertyKeyboard.indexOf(b.letter)
       )
-    : letterOptions.sort(
+    : [...letterOptions].sort(
         (a, b) => alphabet.indexOf(a.letter) - alphabet.indexOf(b.letter)
       );
 
@@ -52,7 +52,7 @@ const Keyboard = ({
         className="flex flex-col justify-center w-full mx-auto"
       >
         <div className="flex flex-row justify-center">
-          {letterOptions.slice(0, 10).map((letter) => (
+          {sortedOptions.slice(0, 10).map((letter) => (
             <React.Fragment key={letter.letter}>
               <button
                 onClick={() => onSelect(letter.letter)}
@@ -76,7 +76,7 @@ const Keyboard = ({
         </div>
         <div className="flex flex-row justify-center">
           {" "}
-          {letterOptions.slice(10, 19).map((letter) => (
+          {sortedOptions.slice(10, 19).map((letter) => (
             <React.Fragment key={letter.letter}>
               <button
                 onClick={() => onSelect(letter.letter)}
@@ -108,7 +108,7 @@ const Keyboard = ({
           >
             <BackspaceIcon className="h-10 w-10" />
           </button>
-          {letterOptions.slice(19, letterOptions.length).map((letter) => (
+          {sortedOptions.slice(19, sortedOptions.length).map((letter) => (
             <React.Fragment key={letter.letter}>
               <button
                 onClick={() => onSelect(letter.letter)}

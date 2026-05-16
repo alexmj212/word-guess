@@ -88,7 +88,14 @@ export class GameStateManager {
       const potentialGameState = localStorage.getItem(key);
       if (potentialGameState) {
         this.gameState = JSON.parse(potentialGameState);
-        if (this.gameState.letterOptions.length) {
+        if (
+          Array.isArray(this.gameState.letterOptions) &&
+          this.gameState.letterOptions.length &&
+          Array.isArray(this.gameState.cursorPointer) &&
+          this.gameState.cursorPointer.length === 2 &&
+          typeof this.gameState.cursorPointer[0] === "number" &&
+          typeof this.gameState.cursorPointer[1] === "number"
+        ) {
           return this.gameState;
         } else {
           this.gameState = JSON.parse(JSON.stringify(DefaultGameState));
