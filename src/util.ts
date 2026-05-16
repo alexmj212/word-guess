@@ -1,6 +1,35 @@
 import { LetterState } from "./App";
 import { alphabet, emojiAlphabet } from "./wordList";
 
+export type PositionConstraint = {
+  index: number;
+  requiredLetter: string;
+};
+
+/**
+ * Returns an array of position constraints (green / position-matched letters)
+ * from all completed rows up to mapPointer[0].
+ * The result is deduplicated — only the first occurrence at each index is kept,
+ * since every row that reaches this point has already passed the same validation.
+ */
+export const getPositionConstraints = (
+  guessMap: LetterState[][],
+  mapPointer: [number, number]
+): PositionConstraint[] => {
+  const seen = new Map<number, string>();
+  guessMap.slice(0, mapPointer[0]).forEach((row) => {
+    row.forEach((letter, index) => {
+      if (letter.positionMatch && !seen.has(index)) {
+        seen.set(index, letter.letter);
+      }
+    });
+  });
+  return Array.from(seen.entries()).map(([index, requiredLetter]) => ({
+    index,
+    requiredLetter,
+  }));
+};
+
 const utilities = {
   determineLetterClass: (letterState: LetterState) => {
     if (

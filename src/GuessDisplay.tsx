@@ -39,7 +39,7 @@ const GuessDisplay = ({
         <div key={row} className="flex flex-row justify-center">
           {guessRow.map((letter: LetterState, index) => (
             <div
-              key={row + index}
+              key={`${row}-${index}`}
               className={`flip-card ${
                 row < mapPointer[0] && "flipped"
               } guess-box`}

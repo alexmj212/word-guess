@@ -1,4 +1,4 @@
-import utilities from "./util";
+import utilities, { getPositionConstraints } from "./util";
 import { LetterState } from "./App";
 import { alphabet, emojiAlphabet } from "./wordList";
 
@@ -29,6 +29,49 @@ const fillRow = (
     map[rowIndex][i] = makeLetter({ letter: ch });
   });
 };
+
+// ---------------------------------------------------------------------------
+// getPositionConstraints
+// ---------------------------------------------------------------------------
+
+describe("getPositionConstraints", () => {
+  it("returns an empty array when there are no completed rows", () => {
+    const map = blankMap();
+    // mapPointer[0] === 0 means no rows have been submitted yet
+    expect(getPositionConstraints(map, [0, 0])).toEqual([]);
+  });
+
+  it("returns a constraint for a single position match in one row", () => {
+    const map = blankMap();
+    // Row 0: letter A at index 2 is a position match
+    map[0][2] = makeLetter({ letter: "A", positionMatch: true });
+    // Pointer is on row 1, so row 0 is completed
+    const constraints = getPositionConstraints(map, [1, 0]);
+    expect(constraints).toHaveLength(1);
+    expect(constraints[0]).toEqual({ index: 2, requiredLetter: "A" });
+  });
+
+  it("returns constraints for multiple position matches across rows", () => {
+    const map = blankMap();
+    map[0][0] = makeLetter({ letter: "C", positionMatch: true });
+    map[1][4] = makeLetter({ letter: "E", positionMatch: true });
+    // Pointer on row 2 — rows 0 and 1 are completed
+    const constraints = getPositionConstraints(map, [2, 0]);
+    expect(constraints).toHaveLength(2);
+    expect(constraints.find((c) => c.index === 0)).toEqual({ index: 0, requiredLetter: "C" });
+    expect(constraints.find((c) => c.index === 4)).toEqual({ index: 4, requiredLetter: "E" });
+  });
+
+  it("returns an empty array when no letters are position-matched", () => {
+    const map = blankMap();
+    // Row 0: all contain matches, no position matches
+    map[0] = map[0].map((_, i) =>
+      makeLetter({ letter: String.fromCharCode(65 + i), containMatch: true })
+    );
+    const constraints = getPositionConstraints(map, [1, 0]);
+    expect(constraints).toEqual([]);
+  });
+});
 
 // ---------------------------------------------------------------------------
 // previousGuess

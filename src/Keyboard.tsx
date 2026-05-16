@@ -1,5 +1,5 @@
 import { BackspaceIcon } from "@heroicons/react/outline";
-import { useEffect, useRef } from "react";
+import { useRef } from "react";
 import * as React from "react";
 import { LetterState } from "./App";
 import utilities from "./util";
@@ -38,12 +38,6 @@ const Keyboard = ({
     : [...letterOptions].sort(
         (a, b) => alphabet.indexOf(a.letter) - alphabet.indexOf(b.letter)
       );
-
-  useEffect(() => {
-    if (enterRef.current) {
-      enterRef.current.focus();
-    }
-  }, [enterRef, letterOptions]);
 
   return (
     <>
