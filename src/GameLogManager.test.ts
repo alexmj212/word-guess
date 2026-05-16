@@ -12,6 +12,10 @@
 
 /* eslint-disable @typescript-eslint/no-var-requires */
 
+// Marks this file as a module under tsc's --isolatedModules (it otherwise has
+// no top-level import/export because each test uses require() after resetModules).
+export {};
+
 const GAME_LOG_KEY = "word-guess-log";
 
 // ---------------------------------------------------------------------------
