@@ -113,6 +113,9 @@ function App() {
   // Track the timestamp of the first guess in each game session for Solve Time
   const gameStartTime = useRef<number | null>(null);
 
+  // Track whether the user has typed their first letter in this mount (session)
+  const hasTrackedFirstLetter = useRef<boolean>(false);
+
   // Build Version
   const [buildVersion, setBuildVersion] = useState<string>();
 
@@ -412,6 +415,15 @@ function App() {
       spaceIsBlank &&
       !isLetterDisabled
     ) {
+      // Fire "First Letter Typed" once per component mount (session proxy for
+      // engaged vs. bounced).  The ref resets naturally on remount / new session.
+      if (!hasTrackedFirstLetter.current) {
+        hasTrackedFirstLetter.current = true;
+        ReactGA.event({
+          category: "Engagement",
+          action: "First Letter Typed",
+        });
+      }
       const newRow = guessMap[mapPointer[0]].map((cell, i) =>
         i === mapPointer[1] ? { ...DefaultLetter, letter: letter } : cell
       );
@@ -818,6 +830,11 @@ function App() {
                       className="button-outline"
                       onClick={() => {
                         if (!showFail) {
+                          // Distinguish "wanted to peek" from "actually gave up"
+                          ReactGA.event({
+                            category: "Gameplay",
+                            action: "Reveal Solution Clicked",
+                          });
                           gameLogManager.updateForfeitCount();
                           clearError();
                           setShowFail(true);

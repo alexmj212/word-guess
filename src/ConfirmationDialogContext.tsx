@@ -1,6 +1,7 @@
 import { useContext, useRef, useState } from "react";
 import * as React from "react";
 import Modal from "./Modal";
+import ReactGA from "react-ga4";
 
 type ConfirmationModalInterface = {
   children?: React.ReactNode;
@@ -38,6 +39,11 @@ const ConfirmationModalContextProvider = ({
 
   const handleCancel = () => {
     setShowConfirmationModal(false);
+    ReactGA.event({
+      category: "Engagement",
+      action: "Confirmation Dialog Cancelled",
+      label: confirmButtonText,
+    });
     resolver.current && resolver.current(false);
   };
 
