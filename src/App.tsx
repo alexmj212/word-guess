@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import {
   BackspaceIcon,
@@ -104,11 +104,11 @@ function App() {
   const [openStatsModal, setOpenStatsModal] = useState<boolean>(false);
   const [openSettingsModal, setOpenSettingsModal] = useState<boolean>(false);
 
-  // Initialize Game Log Manager
-  const gameLogManager = new GameLogManager();
+  // Initialize Game Log Manager — useRef ensures a single instance across renders
+  const gameLogManager = useRef(new GameLogManager()).current;
 
-  // Initialize Game State Manager
-  const gameStateManager = new GameStateManager();
+  // Initialize Game State Manager — useRef ensures a single instance across renders
+  const gameStateManager = useRef(new GameStateManager()).current;
 
   // Build Version
   const [buildVersion, setBuildVersion] = useState<string>();
@@ -201,8 +201,8 @@ function App() {
       },
       localStorage.getItem(PUZZLE_TYPE_KEY) === PuzzleType.TODAY
     );
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
+    gameStateManager,
     guessMap,
     letterOptions,
     mapPointer,
