@@ -110,6 +110,9 @@ function App() {
   // Initialize Game State Manager — useRef ensures a single instance across renders
   const gameStateManager = useRef(new GameStateManager()).current;
 
+  // Track the timestamp of the first guess in each game session for Solve Time
+  const gameStartTime = useRef<number | null>(null);
+
   // Build Version
   const [buildVersion, setBuildVersion] = useState<string>();
 
@@ -241,6 +244,11 @@ function App() {
     // On solved puzzle, show the success modal
     if (showSuccess) {
       setOpenShareModal(true);
+      ReactGA.event({
+        category: "Engagement",
+        action: "Open Modal",
+        label: "Share",
+      });
     }
   }, [showSuccess]);
 
@@ -332,6 +340,7 @@ function App() {
         ReactGA.set({ puzzleType: PuzzleType.RANDOM, puzzleNumber: newGameState.puzzleNumber });
       }
     }
+    gameStartTime.current = null;
     toast.dismiss();
     toast.clearWaitingQueue();
   };
@@ -516,6 +525,11 @@ function App() {
   const validateWord = (guess: string) => {
     gameLogManager.updateGuessCount();
 
+    // Record the start time on the very first guess of a game
+    if (gameStartTime.current === null) {
+      gameStartTime.current = Date.now();
+    }
+
     // Compute hints immutably via the pure applyHints helper
     const { guessRow, letterOptions: newLetterOptions } = applyHints(
       guess,
@@ -552,6 +566,18 @@ function App() {
         category: "Game State",
         action: "Solution Found",
       });
+      if (gameStartTime.current !== null) {
+        const solveTimeSec = Math.round(
+          (Date.now() - gameStartTime.current) / 1000
+        );
+        ReactGA.event({
+          category: "Gameplay",
+          action: "Solve Time",
+          label: String(solveTimeSec),
+          value: solveTimeSec,
+        });
+        gameStartTime.current = null;
+      }
       return;
     }
 
@@ -570,6 +596,7 @@ function App() {
         category: "Game State",
         action: "Game Over",
       });
+      gameStartTime.current = null;
       return;
     }
   };
@@ -678,19 +705,46 @@ function App() {
           </h1>
           <ul className="list-none flex flex-row space-x-4">
             <li>
-              <button title="Stats" onClick={() => setOpenStatsModal(true)}>
+              <button
+                title="Stats"
+                onClick={() => {
+                  setOpenStatsModal(true);
+                  ReactGA.event({
+                    category: "Engagement",
+                    action: "Open Modal",
+                    label: "Stats",
+                  });
+                }}
+              >
                 <ChartBarIcon className="w-8 h-8 inline-block" />
               </button>
             </li>
             <li>
-              <button title="Rules" onClick={() => setOpenRulesModal(true)}>
+              <button
+                title="Rules"
+                onClick={() => {
+                  setOpenRulesModal(true);
+                  ReactGA.event({
+                    category: "Engagement",
+                    action: "Open Modal",
+                    label: "Rules",
+                  });
+                }}
+              >
                 <BookOpenIcon className="w-8 h-8 inline-block" />
               </button>
             </li>
             <li>
               <button
                 title="Settings"
-                onClick={() => setOpenSettingsModal(true)}
+                onClick={() => {
+                  setOpenSettingsModal(true);
+                  ReactGA.event({
+                    category: "Engagement",
+                    action: "Open Modal",
+                    label: "Settings",
+                  });
+                }}
               >
                 <CogIcon className="w-8 h-8 inline-block" />
               </button>
@@ -766,6 +820,7 @@ function App() {
                           gameLogManager.updateForfeitCount();
                           clearError();
                           setShowFail(true);
+                          gameStartTime.current = null;
                           toast.error(
                             `Sorry, the solution is ${
                               difficulty === DifficultyOptions.EMOJI
@@ -826,7 +881,14 @@ function App() {
                 <div className="flex flex-row justify-center items-center space-x-1 md:space-x-4 my-2">
                   <button
                     className="button-outline"
-                    onClick={() => setOpenShareModal(true)}
+                    onClick={() => {
+                      setOpenShareModal(true);
+                      ReactGA.event({
+                        category: "Engagement",
+                        action: "Open Modal",
+                        label: "Share",
+                      });
+                    }}
                   >
                     View Results
                   </button>
@@ -977,9 +1039,19 @@ function App() {
                 )
                 .then(() => {
                   toast.success("Copied to clipboard");
+                  ReactGA.event({
+                    category: "Engagement",
+                    action: "Share Result",
+                    label: "Success",
+                  });
                 })
                 .catch(() => {
                   toast.error("Failed to copy to clipboard");
+                  ReactGA.event({
+                    category: "Engagement",
+                    action: "Share Result",
+                    label: "Failure",
+                  });
                 });
             }}
           >

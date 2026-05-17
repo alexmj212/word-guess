@@ -9,6 +9,16 @@
 // freshly-reset module instance after vi.resetModules().
 // ---------------------------------------------------------------------------
 
+// Mock react-ga4 so GameLogManager.ts can import it without a DOM/GA context
+vi.mock("react-ga4", () => ({
+  default: {
+    event: vi.fn(),
+    initialize: vi.fn(),
+    set: vi.fn(),
+    send: vi.fn(),
+  },
+}));
+
 const GAME_LOG_KEY = "word-guess-log";
 
 // ---------------------------------------------------------------------------
@@ -89,6 +99,63 @@ describe("GameLogManager — updateWinCount", () => {
     mgr.updateWinCount("apple", 2);
     mgr.updateWinCount("apple", 5);
     expect(mgr.gameLog.solvedWords["apple"]).toBe(2);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Win streak milestone events
+// ---------------------------------------------------------------------------
+
+describe("GameLogManager — Win Streak Milestone events", () => {
+  beforeEach(() => {
+    vi.resetModules();
+    vi.clearAllMocks();
+  });
+
+  it("fires a Win Streak Milestone GA event when winStreak reaches 3", async () => {
+    const ReactGA = await import("react-ga4");
+    const { GameLogManager } = await import("./GameLogManager");
+    const mgr = new GameLogManager();
+    mgr.updateWinCount("apple", 2);
+    mgr.updateWinCount("crane", 3);
+    mgr.updateWinCount("stove", 1);
+    expect(mgr.gameLog.winStreak).toBe(3);
+    expect(ReactGA.default.event).toHaveBeenCalledWith({
+      category: "Achievement",
+      action: "Win Streak Milestone",
+      label: "3",
+    });
+  });
+
+  it("does not fire a milestone event for non-milestone streak values", async () => {
+    const ReactGA = await import("react-ga4");
+    const { GameLogManager } = await import("./GameLogManager");
+    const mgr = new GameLogManager();
+    mgr.updateWinCount("apple", 2);
+    // streak is 1 — not a milestone
+    expect(ReactGA.default.event).not.toHaveBeenCalledWith(
+      expect.objectContaining({ action: "Win Streak Milestone" })
+    );
+  });
+
+  it("fires milestone events at each threshold (5, 10)", async () => {
+    const ReactGA = await import("react-ga4");
+    const { GameLogManager } = await import("./GameLogManager");
+    const mgr = new GameLogManager();
+    for (let i = 0; i < 10; i++) {
+      mgr.updateWinCount(`word${i}`, 2);
+    }
+    expect(mgr.gameLog.winStreak).toBe(10);
+    // Both streak=5 and streak=10 should have fired
+    const milestoneCalls = (ReactGA.default.event as ReturnType<typeof vi.fn>).mock.calls.filter(
+      (call: unknown[]) =>
+        (call[0] as { action: string }).action === "Win Streak Milestone"
+    );
+    const labels = milestoneCalls.map(
+      (call: unknown[]) => (call[0] as { label: string }).label
+    );
+    expect(labels).toContain("5");
+    expect(labels).toContain("10");
   });
 });
 

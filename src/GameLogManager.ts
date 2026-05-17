@@ -1,3 +1,5 @@
+import ReactGA from "react-ga4";
+
 export type GameLog = {
   gamesPlayed: number;
   winStreak: number;
@@ -89,6 +91,15 @@ export class GameLogManager {
       this.gameLog.solvedWords[word] = guessCount;
     } else if (this.gameLog.solvedWords[word] > guessCount) {
       this.gameLog.solvedWords[word] = guessCount;
+    }
+    // Fire a milestone event when the win streak hits a notable threshold
+    const milestones = [3, 5, 10, 25, 50];
+    if (milestones.includes(this.gameLog.winStreak)) {
+      ReactGA.event({
+        category: "Achievement",
+        action: "Win Streak Milestone",
+        label: String(this.gameLog.winStreak),
+      });
     }
     this._saveGameLog();
   }
