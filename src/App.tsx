@@ -6,10 +6,10 @@ import {
   ChartBarIcon,
   CogIcon,
   ShareIcon,
-} from "@heroicons/react/outline";
+} from "@heroicons/react/24/outline";
 import { RadioGroup } from "@headlessui/react";
 import { useHotkeys } from "react-hotkeys-hook";
-import "react-toastify/dist/ReactToastify.min.css";
+import "react-toastify/dist/ReactToastify.css";
 import "./App.css";
 import logo from "./word-guess-logo.png";
 import Modal from "./Modal";
@@ -586,7 +586,7 @@ function App() {
   // Handle keyboard input
   useHotkeys(
     alphabet.join(", "),
-    (key) => onSelect(key.key.toLocaleUpperCase()),
+    (event) => onSelect(event.key.toLocaleUpperCase()),
     [onSelect]
   );
   useHotkeys("backspace", () => onBackspace(), [onBackspace]);

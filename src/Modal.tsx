@@ -1,7 +1,7 @@
 import { Fragment, useRef } from "react";
 import * as React from "react";
 import { Dialog, Transition } from "@headlessui/react";
-import { XIcon } from "@heroicons/react/outline";
+import { XMarkIcon } from "@heroicons/react/24/outline";
 
 type ModalProps = {
   title: string;
@@ -86,7 +86,7 @@ const Modal = ({
                         onClick={() => setOpen(false)}
                         ref={closeRef}
                       >
-                        <XIcon className="w-8 h-8"></XIcon>
+                        <XMarkIcon className="w-8 h-8"></XMarkIcon>
                       </button>
                     </div>
                     <div className="mt-2">{children}</div>

@@ -5,15 +5,15 @@
   "homepage": "https://alexmj212.dev/word-guess",
   "dependencies": {
     "@headlessui/react": "^1.4.2",
-    "@heroicons/react": "^1.0.5",
+    "@heroicons/react": "^2.2.0",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",
     "@testing-library/user-event": "^14.6.1",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "react-ga4": "^1.4.1",
-    "react-hotkeys-hook": "^3.4.4",
-    "react-toastify": "^8.2.0"
+    "react-ga4": "^3.0.1",
+    "react-hotkeys-hook": "^4.6.2",
+    "react-toastify": "^11.1.0"
   },
   "scripts": {
     "dev": "vite",

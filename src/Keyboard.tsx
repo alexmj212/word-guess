@@ -1,4 +1,4 @@
-import { BackspaceIcon } from "@heroicons/react/outline";
+import { BackspaceIcon } from "@heroicons/react/24/outline";
 import { useRef } from "react";
 import * as React from "react";
 import { LetterState } from "./App";
