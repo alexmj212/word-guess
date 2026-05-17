@@ -8,7 +8,10 @@ import App from "./App";
 describe("App — smoke test", () => {
   it("renders the Word Guess header without crashing", () => {
     render(<App />);
-    // The h1 contains "Word Guess" as text (alongside the logo img)
-    expect(screen.getByRole("heading", { name: /word guess/i })).toBeInTheDocument();
+    // @headlessui/react 1.7+ uses aria-modal="true" on the Dialog, which means
+    // testing-library's role queries only see inside the dialog when it is open.
+    // The rules modal auto-opens on first visit (gamesPlayed === 0), so we
+    // query by text rather than role to reach the h1 outside the modal.
+    expect(screen.getByText("Word Guess")).toBeInTheDocument();
   });
 });

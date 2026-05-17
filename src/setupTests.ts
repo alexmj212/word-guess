@@ -15,6 +15,20 @@ globalThis.IntersectionObserver = class IntersectionObserver {
   }
 } as unknown as typeof IntersectionObserver;
 
+// jsdom does not implement ResizeObserver; @headlessui/react@1.7+ requires it
+// for Dialog. A no-op stub is sufficient for tests.
+globalThis.ResizeObserver = class ResizeObserver {
+  observe() {
+    return;
+  }
+  unobserve() {
+    return;
+  }
+  disconnect() {
+    return;
+  }
+} as unknown as typeof ResizeObserver;
+
 // Node.js 22+ exposes a built-in localStorage stub on globalThis that lacks
 // .clear(), .getItem(), .setItem(), etc. Vitest's jsdom environment sets up a
 // proper localStorage on `globalThis.jsdom.window`, but the Node stub wins the

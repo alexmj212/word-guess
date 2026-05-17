@@ -26,5 +26,13 @@
       "version": "detect"
     }
   },
-  "ignorePatterns": ["**/*.css"]
+  "ignorePatterns": ["**/*.css"],
+  "overrides": [
+    {
+      "files": ["*.test.ts", "*.test.tsx"],
+      "rules": {
+        "@typescript-eslint/no-non-null-assertion": "off"
+      }
+    }
+  ]
 }
