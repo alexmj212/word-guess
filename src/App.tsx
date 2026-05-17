@@ -14,7 +14,7 @@ import "./App.css";
 import logo from "./word-guess-logo.png";
 import Modal from "./Modal";
 import { alphabet, guessWords, validWords } from "./wordList";
-import utilities, { getPositionConstraints } from "./util";
+import utilities, { applyHints, getPositionConstraints } from "./util";
 import GuessDisplay from "./GuessDisplay";
 import Keyboard from "./Keyboard";
 import { GameLogManager } from "./GameLogManager";
@@ -201,8 +201,10 @@ function App() {
       },
       localStorage.getItem(PUZZLE_TYPE_KEY) === PuzzleType.TODAY
     );
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
+    guessMap,
+    letterOptions,
     mapPointer,
     showSuccess,
     showFail,
@@ -406,10 +408,13 @@ function App() {
       spaceIsBlank &&
       !isLetterDisabled
     ) {
-      guessMap[mapPointer[0]][mapPointer[1]] = {
-        ...DefaultLetter,
-        letter: letter,
-      };
+      const newRow = guessMap[mapPointer[0]].map((cell, i) =>
+        i === mapPointer[1] ? { ...DefaultLetter, letter: letter } : cell
+      );
+      const newGuessMap = guessMap.map((row, r) =>
+        r === mapPointer[0] ? newRow : row
+      );
+      setGuessMap(newGuessMap);
       setMapPointer([mapPointer[0], mapPointer[1] + 1]);
       clearError();
     }
@@ -423,7 +428,13 @@ function App() {
       !disableBackspace &&
       guessMap[mapPointer[0]].some((e) => e.letter !== "")
     ) {
-      guessMap[mapPointer[0]][mapPointer[1] - 1] = DefaultLetter;
+      const newRow = guessMap[mapPointer[0]].map((cell, i) =>
+        i === mapPointer[1] - 1 ? { ...DefaultLetter } : cell
+      );
+      const newGuessMap = guessMap.map((row, r) =>
+        r === mapPointer[0] ? newRow : row
+      );
+      setGuessMap(newGuessMap);
       setMapPointer([mapPointer[0], mapPointer[1] - 1]);
     }
     clearError();
@@ -510,71 +521,21 @@ function App() {
   const validateWord = (guess: string) => {
     gameLogManager.updateGuessCount();
 
-    const guessMapRow = guessMap[mapPointer[0]];
+    // Compute hints immutably via the pure applyHints helper
+    const { guessRow, letterOptions: newLetterOptions } = applyHints(
+      guess,
+      solution,
+      guessMap[mapPointer[0]],
+      letterOptions
+    );
 
-    // Loop over array of letter from the guessed word
-    guess.split("").forEach((letter, index) => {
-      // Search method for finding keyboard letter to be updated
-      const keyboardLetter =
-        letterOptions.find(
-          (letterOption: LetterState) => letterOption.letter === letter
-        ) ?? DefaultLetter;
+    const newGuessMap = guessMap.map((row, r) =>
+      r === mapPointer[0] ? guessRow : row
+    );
 
-      const guessMapLetter = guessMapRow[index];
-
-      // Check if letter is contained in goal word
-      if (solution.indexOf(letter) >= 0) {
-        guessMapLetter.noMatch = false;
-        guessMapLetter.containMatch = true;
-
-        // Update keyboard state
-        keyboardLetter.containMatch = true;
-
-        // Check if letter matches the position
-        if (solution.split("")[index] === letter) {
-          guessMapLetter.positionMatch = true;
-
-          // Update keyboard state
-          keyboardLetter.positionMatch = true;
-        }
-      } else {
-        // Gray out letter from keyboard if no match is found for the letter
-        guessMapLetter.noMatch = true;
-
-        // Update keyboard state
-        keyboardLetter.noMatch = true;
-        // Add difficulty
-        keyboardLetter.disabled = true;
-      }
-
-      // Retroactively remove hints on duplicate letters
-      const dupeLetterMatch = new RegExp(letter, "g"); // regex for finding occurances of the current letter
-      const guessOccurenceCount = guess.match(dupeLetterMatch)?.length ?? 0; // count occurances of letter in guess word, 0 if none
-      const goalOccurenceCount = solution.match(dupeLetterMatch)?.length ?? 0; // count occurances of letter in goal word, 0 if none
-      // If the guess contains more occurances than the goal and it's not the first time the letter was guessed, remove hint
-      if (
-        guessOccurenceCount > goalOccurenceCount &&
-        guess.indexOf(letter) < index
-      ) {
-        guessMapRow
-          .filter(
-            (guessLetter, filterIndex) =>
-              letter === guessLetter.letter && filterIndex < index
-          ) // retrieve previous duplicate letters
-          .forEach((guessLetter) => (guessLetter.containMatch = false)); // disable their hint
-      }
-      // If the guess already has a position match, hide hints for duplicate letter after
-      if (
-        guessOccurenceCount > goalOccurenceCount &&
-        guess.indexOf(letter) < index &&
-        guessMapRow.some(
-          (guessLetter) =>
-            letter === guessLetter.letter && guessLetter.positionMatch
-        )
-      ) {
-        guessMapLetter.containMatch = false;
-      }
-    });
+    // Commit updated state
+    setGuessMap(newGuessMap);
+    setLetterOptions(newLetterOptions);
 
     // Only check for success after the state of the letter is determined
     // This ensures displayed result is accurate
@@ -616,12 +577,6 @@ function App() {
       });
       return;
     }
-
-    // Update keyboard
-    setLetterOptions([...letterOptions]);
-
-    // Update guess map
-    setGuessMap([...guessMap]);
   };
 
   /**
