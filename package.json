@@ -6,63 +6,49 @@
   "dependencies": {
     "@headlessui/react": "^1.4.2",
     "@heroicons/react": "^1.0.5",
-    "@testing-library/jest-dom": "^5.16.1",
+    "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^12.1.2",
     "@testing-library/user-event": "^13.5.0",
-    "@types/jest": "^27.4.0",
     "@types/react": "^17.0.38",
     "@types/react-dom": "^17.0.11",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
     "react-ga4": "^1.4.1",
     "react-hotkeys-hook": "^3.4.4",
-    "react-scripts": "5.0.0",
     "react-toastify": "^8.2.0"
   },
   "scripts": {
-    "start": "export REACT_APP_VERSION=$(git rev-parse --short=7 HEAD) && react-scripts start",
+    "dev": "vite",
+    "start": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "lint": "npx eslint ./src",
     "lint:fix": "npx eslint --fix ./src",
     "lint:precommit": "npx eslint --fix",
-    "build": "GENERATE_SOURCEMAP=false react-scripts build && npm run build-number",
-    "build-number": "export REACT_APP_VERSION=$(git rev-parse --short=7 HEAD) && sed -i -- 's/%REACT_APP_VERSION%/'$REACT_APP_VERSION'/g' build/index.html",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject",
     "prepare": "husky install"
-  },
-  "eslintConfig": {
-    "extends": [
-      "react-app",
-      "react-app/jest"
-    ]
-  },
-  "browserslist": {
-    "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
-    ],
-    "development": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version"
-    ]
   },
   "devDependencies": {
     "@types/node": "^22.19.19",
     "@typescript-eslint/eslint-plugin": "^5.12.0",
     "@typescript-eslint/parser": "^5.12.0",
+    "@vitejs/plugin-react": "^6.0.2",
+    "@vitest/coverage-v8": "^4.1.6",
     "autoprefixer": "^10.4.2",
     "eslint": "^8.9.0",
     "eslint-config-prettier": "^8.4.0",
     "eslint-plugin-react": "^7.28.0",
     "eslint-plugin-react-hooks": "^4.3.0",
     "husky": "^7.0.4",
+    "jsdom": "^26.1.0",
     "lint-staged": "^12.3.4",
     "postcss": "^8.5.14",
     "prettier": "2.5.1",
     "tailwindcss": "^3.0.13",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "vite": "^8.0.13",
+    "vitest": "^4.1.6"
   },
   "lint-staged": {
     "**/*": "npm run lint:precommit"

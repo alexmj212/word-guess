@@ -9,7 +9,7 @@ import Modal from "./Modal";
 describe("Modal — rendering", () => {
   it("renders the title and children when open", () => {
     render(
-      <Modal title="Test Title" open={true} setOpen={jest.fn()}>
+      <Modal title="Test Title" open={true} setOpen={vi.fn()}>
         <p>Modal content</p>
       </Modal>
     );
@@ -19,7 +19,7 @@ describe("Modal — rendering", () => {
 
   it("does not render content when closed", () => {
     render(
-      <Modal title="Hidden Title" open={false} setOpen={jest.fn()}>
+      <Modal title="Hidden Title" open={false} setOpen={vi.fn()}>
         <p>Hidden content</p>
       </Modal>
     );
@@ -34,7 +34,7 @@ describe("Modal — rendering", () => {
 
 describe("Modal — closing", () => {
   it("calls setOpen(false) when the close button is clicked", async () => {
-    const setOpen = jest.fn();
+    const setOpen = vi.fn();
     render(
       <Modal title="Close Test" open={true} setOpen={setOpen} />
     );

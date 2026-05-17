@@ -26,11 +26,11 @@ const qwertyLetters = (): LetterState[] =>
   qwertyKeyboard.map((l) => makeLetter(l));
 
 const defaultProps = {
-  onSelect: jest.fn(),
+  onSelect: vi.fn(),
   disableSelect: () => false,
-  onSubmit: jest.fn(),
+  onSubmit: vi.fn(),
   disableSubmit: false,
-  onBackspace: jest.fn(),
+  onBackspace: vi.fn(),
   disableBackspace: false,
 };
 
@@ -40,7 +40,7 @@ const defaultProps = {
 
 describe("Keyboard — rendering", () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it("renders all 26 letter buttons in qwerty mode", () => {
@@ -98,11 +98,11 @@ describe("Keyboard — rendering", () => {
 
 describe("Keyboard — interaction", () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it("calls onSelect with the correct letter when a key is clicked", async () => {
-    const onSelect = jest.fn();
+    const onSelect = vi.fn();
     render(
       <Keyboard
         {...defaultProps}
@@ -117,7 +117,7 @@ describe("Keyboard — interaction", () => {
   });
 
   it("calls onBackspace when the Backspace button is clicked", async () => {
-    const onBackspace = jest.fn();
+    const onBackspace = vi.fn();
     render(
       <Keyboard
         {...defaultProps}
@@ -131,7 +131,7 @@ describe("Keyboard — interaction", () => {
   });
 
   it("calls onSubmit when the Enter button is clicked", async () => {
-    const onSubmit = jest.fn();
+    const onSubmit = vi.fn();
     render(
       <Keyboard
         {...defaultProps}

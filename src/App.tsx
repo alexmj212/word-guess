@@ -121,12 +121,7 @@ function App() {
     const storedDifficulty = determineDifficulty();
     const storedPuzzleType = determinePuzzleType();
 
-    const ver =
-      document
-        .querySelector('meta[name="build-version"]')
-        ?.getAttribute("build-version") || "";
-
-    setBuildVersion(ver);
+    setBuildVersion(__BUILD_VERSION__);
 
     // Determine Daily Puzzle
     const startDate = new Date("2021-06-19");
@@ -168,7 +163,7 @@ function App() {
     if (window.location.hostname === "alexmj212.dev") {
       ReactGA.initialize("G-SXPVRPDJ9X", {
         gaOptions: {
-          build: ver,
+          build: __BUILD_VERSION__,
           keyboardType: storedKeyboard,
           difficulty: storedDifficulty,
           puzzleType: storedPuzzleType,

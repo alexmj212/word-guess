@@ -132,7 +132,7 @@ describe("GuessDisplay — (BUG-H6) key uniqueness", () => {
     // but it cannot be characterised purely via console.error inspection today.
     //
     // TODO(bug-H6): fix by using key={`${row}-${index}`} in GuessDisplay.tsx:42
-    const consoleSpy = jest.spyOn(console, "error").mockImplementation(jest.fn());
+    const consoleSpy = vi.spyOn(console, "error").mockImplementation(vi.fn());
 
     render(
       <GuessDisplay

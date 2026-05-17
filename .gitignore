@@ -10,6 +10,26 @@
 
 # production
 /build
+/dist
+
+# claude code internals (worktrees, agent state)
+/.claude
+
+# local mcp config
+/.mcp.json
+
+# session planning artifacts (intentionally untracked)
+/ANALYTICS.md
+/DEPENDENCIES.md
+/GAMEPLAY-IDEAS.md
+/IMPROVEMENTS.md
+/INSTRUMENTATION.md
+/MASTER-PLAN.md
+/MIGRATION-PLAN.md
+/MONETIZATION.md
+/REVIEW-PLAN.md
+/REVIEW.md
+/TESTING.md
 
 # misc
 .DS_Store
