@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#000000" />
+    <meta name="description" content="Guess the 5 letter word" />
+    <title>Word Guess Game</title>
+    <link
+      rel="apple-touch-icon"
+      sizes="180x180"
+      href="/word-guess/apple-touch-icon.png"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="32x32"
+      href="/word-guess/favicon-32x32.png"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="16x16"
+      href="/word-guess/favicon-16x16.png"
+    />
+    <link rel="manifest" href="/word-guess/site.webmanifest" />
+    <script>
+      // Manually determine theme immediately on load, set local storage to ensure availability to application
+      if (
+        localStorage.theme === "dark" ||
+        (!("theme" in localStorage) &&
+          window.matchMedia("(prefers-color-scheme: dark)").matches)
+      ) {
+        document.documentElement.classList.add("dark");
+        localStorage.setItem("theme", "dark");
+      } else {
+        document.documentElement.classList.remove("dark");
+        localStorage.setItem("theme", "light");
+      }
+    </script>
+    <script type="module" crossorigin src="/word-guess/assets/index-CpRZ8HNR.js"></script>
+    <link rel="stylesheet" crossorigin href="/word-guess/assets/index-cFAqR5gx.css">
+  </head>
+  <body>
+    <noscript>You need to enable JavaScript to run this app.</noscript>
+    <div id="root"></div>
+  </body>
+</html>
