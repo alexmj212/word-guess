@@ -24,7 +24,7 @@ export const RadioWithConfirmation = ({
   return (
     <RadioGroup
       value={selectedValue}
-      onChange={(value) => handleOnClick(value)}
+      onChange={(value: string) => handleOnClick(value)}
     >
       {keys.map((option) => (
         <RadioGroup.Option key={option} value={option}>
