@@ -29,26 +29,21 @@ export type GameState = {
   lastUpdated: number;
 };
 
-export const DefaultLetter: LetterState = {
+export const DefaultLetter: Readonly<LetterState> = {
   letter: "",
   containMatch: false,
   positionMatch: false,
   noMatch: false,
   disabled: false,
-};
+} as const;
 
 /**
- * Create map of empty guess rows
+ * Create map of empty guess rows — each cell is its own object so mutations
+ * on one cell never affect another (no shared object references).
  */
-const DefaultGuessMap = [...Array(6).keys()].map(() => {
-  return [
-    DefaultLetter,
-    DefaultLetter,
-    DefaultLetter,
-    DefaultLetter,
-    DefaultLetter,
-  ];
-});
+const DefaultGuessMap = Array.from({ length: 6 }, () =>
+  Array.from({ length: 5 }, () => ({ ...DefaultLetter }))
+);
 
 const DefaultLetterOptions = alphabet.map((letter) => {
   return {

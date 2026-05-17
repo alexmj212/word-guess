@@ -554,8 +554,9 @@ function App() {
       label: guess,
     });
 
-    // Success
-    if (guess === solution) {
+    // Success — compare case-insensitively so future call paths that skip
+    // uppercasing don't silently miss wins.
+    if (guess.toUpperCase() === solution.toUpperCase()) {
       gameLogManager.updateWinCount(guess, mapPointer[0] + 1);
       setMapPointer([mapPointer[0] + 1, 0]);
       setTimeout(() => {

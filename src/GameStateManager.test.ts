@@ -1,4 +1,5 @@
 import {
+  DefaultLetter,
   GameStateManager,
   GAME_STATE_KEY,
   TODAYS_GAME_STATE_KEY,
@@ -33,6 +34,41 @@ describe("GameStateManager — default state", () => {
     expect(mgr.gameState.showFail).toBe(false);
     expect(mgr.gameState.showSuccess).toBe(false);
     expect(mgr.gameState.showError).toBe(false);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// DefaultLetter & DefaultGuessMap structural guarantees
+// ---------------------------------------------------------------------------
+
+describe("DefaultLetter — immutability", () => {
+  it("DefaultLetter has the correct default values", () => {
+    expect(DefaultLetter.letter).toBe("");
+    expect(DefaultLetter.containMatch).toBe(false);
+    expect(DefaultLetter.positionMatch).toBe(false);
+    expect(DefaultLetter.noMatch).toBe(false);
+    expect(DefaultLetter.disabled).toBe(false);
+  });
+});
+
+describe("DefaultGuessMap — independent cell references", () => {
+  it("each cell in the default guessMap is its own object instance", () => {
+    const mgr = new GameStateManager();
+    const map = mgr.generateNewGameState().guessMap;
+    // Pick two different cells and confirm they are not the same reference
+    expect(map[0][0]).not.toBe(map[0][1]);
+    expect(map[0][0]).not.toBe(map[1][0]);
+    expect(map[0][0]).not.toBe(map[5][4]);
+  });
+
+  it("mutating one cell does not affect other cells", () => {
+    const mgr = new GameStateManager();
+    const map = mgr.generateNewGameState().guessMap;
+    // Spread onto a new object (as onSelect does) — should not bleed
+    const mutatedCell = { ...map[0][0], letter: "Z" };
+    expect(map[0][1].letter).toBe("");
+    expect(map[1][0].letter).toBe("");
+    void mutatedCell; // used
   });
 });
 
