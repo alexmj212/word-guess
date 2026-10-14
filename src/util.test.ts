@@ -1,4 +1,4 @@
-import utilities, { applyHints, getPositionConstraints } from "./util";
+import utilities, { applyHints, CANONICAL_URL, getPositionConstraints } from "./util";
 import { LetterState } from "./App";
 import { alphabet, emojiAlphabet } from "./wordList";
 
@@ -139,8 +139,16 @@ describe("utilities.generateShareText", () => {
 
     const text = utilities.generateShareText(map, 1);
     const lines = text.trim().split("\n").filter((l) => l.length > 0);
-    // header + 1 emoji row
-    expect(lines).toHaveLength(2);
+    // header + 1 emoji row + link back to the original
+    expect(lines).toHaveLength(3);
+  });
+
+  it("ends with a link to the original game", () => {
+    const map = blankMap();
+    map[0] = map[0].map(() => makeLetter({ letter: "A" }));
+
+    const text = utilities.generateShareText(map, 1);
+    expect(text.trim().endsWith(CANONICAL_URL)).toBe(true);
   });
 
   it("emits correct emojis for no-match, contain-match, and position-match", () => {

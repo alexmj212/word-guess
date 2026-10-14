@@ -14,7 +14,12 @@ import "./App.css";
 import logo from "./word-guess-logo.png";
 import Modal from "./Modal";
 import { alphabet, guessWords, validWords } from "./wordList";
-import utilities, { applyHints, getPositionConstraints } from "./util";
+import utilities, {
+  applyHints,
+  CANONICAL_HOST,
+  CANONICAL_URL,
+  getPositionConstraints,
+} from "./util";
 import GuessDisplay from "./GuessDisplay";
 import Keyboard from "./Keyboard";
 import { GameLogManager } from "./GameLogManager";
@@ -33,6 +38,15 @@ import { RadioWithConfirmation } from "./RadioWithConfirmation";
 import { Slide, toast, ToastContainer } from "react-toastify";
 import ReactGA from "react-ga4";
 import Countdown from "./Countdown";
+
+// GA4 measurement ID for the live site. Swap in a dedicated web stream ID so
+// copies of older builds, which hard-code G-SXPVRPDJ9X, stay out of its reports.
+const GA_MEASUREMENT_ID = "G-SXPVRPDJ9X";
+
+// True when this build is running somewhere other than the original site.
+const isCopy =
+  window.location.hostname !== CANONICAL_HOST &&
+  window.location.hostname !== "localhost";
 
 export type LetterState = {
   letter: string;
@@ -166,8 +180,8 @@ function App() {
         gameLogManager.gameLog.guessCount === 0
     );
 
-    if (window.location.hostname === "alexmj212.dev") {
-      ReactGA.initialize("G-SXPVRPDJ9X", {
+    if (window.location.hostname === CANONICAL_HOST) {
+      ReactGA.initialize(GA_MEASUREMENT_ID, {
         gaOptions: {
           build: __BUILD_VERSION__,
           keyboardType: storedKeyboard,
@@ -705,6 +719,14 @@ function App() {
 
   return (
     <div className="w-full h-full">
+      {isCopy && (
+        <div className="w-full bg-slate-200 dark:bg-slate-700 text-center text-sm py-2 px-2">
+          Word Guess was made by alexmj212. Play the original at{" "}
+          <a href={CANONICAL_URL} className="underline font-bold">
+            alexmj212.dev/word-guess
+          </a>
+        </div>
+      )}
       <div className="flex flex-col w-full h-full max-w-4xl mx-auto py-2 px-2 sm:px-4">
         <div className="flex flex-initial flex-row flex-wrap justify-between items-end border-b-2 border-slate-300 dark:border-slate-500 pb-4 space-y-2">
           <h1 className="text-lg md:text-4xl font-bold flex flex-row items-center">
@@ -961,8 +983,8 @@ function App() {
         </div>
         <div className="flex flex-initial flex-wrap flex-row justify-between border-t-2 border-slate-300 dark:border-slate-500 mt-4 py-4 text-xs">
           <div className="flex flex-auto flex-row space-x-4">
-            <a href="https://alexmj212.dev" className="underline">
-              alexmj212.dev
+            <a href={CANONICAL_URL} className="underline">
+              Original Word Guess by alexmj212.dev
             </a>
             <a
               href="https://alexmj212.dev/blog/understanding-how-wordle-works/"
