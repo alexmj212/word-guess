@@ -1,6 +1,9 @@
 name: Build and Deploy
 
-on: push
+on:
+  push:
+    branches: [main]
+  pull_request:
 
 jobs:
   publish:
@@ -18,13 +21,19 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Lint
+        run: npm run lint
+
+      - name: Test
+        run: npm test
+
       - name: Build
         env:
           REACT_APP_VERSION: ${{ github.sha }}
         run: npm run build
 
       - name: Deploy to GitHub Pages
-        if: success()
+        if: success() && github.event_name == 'push' && github.ref == 'refs/heads/main'
         uses: crazy-max/ghaction-github-pages@v4
         with:
           target_branch: gh-pages

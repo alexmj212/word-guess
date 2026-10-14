@@ -1,6 +1,10 @@
 import { LetterState } from "./App";
 import { alphabet, emojiAlphabet } from "./wordList";
 
+// Where the original game lives. Copies of the build keep pointing players here.
+export const CANONICAL_HOST = "alexmj212.dev";
+export const CANONICAL_URL = `https://${CANONICAL_HOST}/word-guess/`;
+
 export type HintResult = {
   guessRow: LetterState[];       // updated row of 5 LetterStates
   letterOptions: LetterState[];  // updated keyboard array of 26
@@ -150,6 +154,8 @@ const utilities = {
       });
       shareText += "\n";
     });
+
+    shareText += `\n${CANONICAL_URL}`;
 
     return shareText;
   },
